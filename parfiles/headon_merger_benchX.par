@@ -39,15 +39,13 @@ CarpetX::ncells_x = 64
 CarpetX::ncells_y = 64
 CarpetX::ncells_z = 64
 
-# make tile size very large so that we have a single tile (for threads)
-#CarpetX::max_tile_size_x = 10000000 # or some other very large number
-#CarpetX::max_tile_size_y = 10000000
-#CarpetX::max_tile_size_z = 10000000
-
-# make grid size very large so that we have a single grid (boxes used to parallelize over MPI)
-#CarpetX::max_grid_size_x = 1000000 # or some other very large number
-#CarpetX::max_grid_size_y = 1000000
-#CarpetX::max_grid_size_z = 1000000
+# winning combination on Roland's workstation
+CarpetX::max_tile_size_x = 10000000
+CarpetX::max_tile_size_y = 32
+CarpetX::max_tile_size_z = 8
+CarpetX::max_grid_size_x = 64
+CarpetX::max_grid_size_y = 64
+CarpetX::max_grid_size_z = 64
 
 CarpetX::periodic_x = no
 CarpetX::periodic_y = no

@@ -1,0 +1,1683 @@
+--------------------------------------------------------------------------------
+
+       10                                  
+  1   0101       ************************  
+  01  1010 10      The Cactus Code V4.14.0    
+ 1010 1101 011      www.cactuscode.org     
+  1001 100101    ************************  
+    00010101                               
+     100011     (c) Copyright The Authors  
+      0100      GNU Licensed. No Warranty  
+      0101                                 
+--------------------------------------------------------------------------------
+
+Cactus version:    4.14.0
+Compile date:      Jun 13 2023 (09:52:58)
+Run date:          Jul 11 2023 (08:38:11-0500)
+Run host:          cn061.delta.ncsa.illinois.edu (pid=3052646)
+Working directory: /scratch/bbgz/adima/test_canudax/2Punc
+Executable:        /projects/bbgz/adima/Cactus/exe/cactus_sim
+Parameter file:    2Punc_canudax.par
+--------------------------------------------------------------------------------
+
+Activating thorn Cactus...Success -> active implementation Cactus
+Activation requested for 
+--->ADMBase CanudaX_BSSNMoL CarpetX Coordinates ErrorEstimator IOUtil ODESolvers TimerReport TmunuBase TwoPunctures<---
+Thorn ADMBase requests automatic activation of Loop
+Thorn CarpetX requests automatic activation of AMReX
+Thorn CarpetX requests automatic activation of MPI
+Thorn CarpetX requests automatic activation of yaml_cpp
+Thorn CarpetX requests automatic activation of zlib
+Thorn CarpetX requests automatic activation of Arith
+Thorn CarpetX requests automatic activation of ADIOS2
+Thorn CarpetX requests automatic activation of openPMD
+Thorn CarpetX requests automatic activation of Silo
+Thorn TwoPunctures requests automatic activation of GSL
+Thorn ADIOS2 requests automatic activation of HDF5
+Thorn ADIOS2 requests automatic activation of CMake
+Thorn Arith requests automatic activation of NSIMD
+Thorn MPI requests automatic activation of hwloc
+Activating thorn ADIOS2...Success -> active implementation ADIOS2
+Activating thorn ADMBase...Success -> active implementation ADMBase
+Activating thorn AMReX...Success -> active implementation AMReX
+Activating thorn Arith...Success -> active implementation Arith
+Activating thorn CanudaX_BSSNMoL...Success -> active implementation CanudaX_BSSNMoL
+Activating thorn CarpetX...Success -> active implementation CarpetX
+Activating thorn CMake...Success -> active implementation CMake
+Activating thorn Coordinates...Success -> active implementation Coordinates
+Activating thorn ErrorEstimator...Success -> active implementation ErrorEstimator
+Activating thorn GSL...Success -> active implementation GSL
+Activating thorn HDF5...Success -> active implementation HDF5
+Activating thorn hwloc...Success -> active implementation hwloc
+Activating thorn IOUtil...Success -> active implementation IO
+Activating thorn Loop...Success -> active implementation Loop
+Activating thorn MPI...Success -> active implementation MPI
+Activating thorn NSIMD...Success -> active implementation NSIMD
+Activating thorn ODESolvers...Success -> active implementation ODESolvers
+Activating thorn openPMD...Success -> active implementation openPMD
+Activating thorn Silo...Success -> active implementation Silo
+Activating thorn TimerReport...Success -> active implementation timerreport
+Activating thorn TmunuBase...Success -> active implementation TmunuBase
+Activating thorn TwoPunctures...Success -> active implementation TwoPunctures
+Activating thorn yaml_cpp...Success -> active implementation yaml_cpp
+Activating thorn zlib...Success -> active implementation zlib
+--------------------------------------------------------------------------------
+  if (recover initial data)
+    Recover parameters
+  endif
+
+  Startup routines
+    [CCTK_STARTUP]
+      CarpetX::Driver_Startup: Start up the driver
+      IOUtil::IOUtil_Startup: Startup routine
+      GROUP hwloc_startup: hwloc startup group
+        hwloc::hwloc_version: Output hwloc version
+
+  Startup routines which need an existing grid hierarchy
+    [CCTK_WRAGH]
+      Arith::Test_smallvector: [meta] Test small vectors
+      Arith::Test_spvect: [meta] Test sparse vectors
+  Parameter checking routines
+    [CCTK_PARAMCHECK]
+      CanudaX_BSSNMoL::Lean_ParamCheck: Check Lean parameters for consistency
+      TwoPunctures::TwoPunctures_ParamCheck: Check parameters and thorn needs
+
+  Initialisation
+    if (NOT (recover initial data AND recovery_mode is 'strict'))
+      [CCTK_PREREGRIDINITIAL]
+      Set up grid hierarchy
+      [CCTK_POSTREGRIDINITIAL]
+      [CCTK_BASEGRID]
+        CanudaX_BSSNMoL::LeanBSSN_zero: Set everywhere grid functions to zero to prevent spurious nans
+        CanudaX_BSSNMoL::LeanBSSN_zero_constr: Set everywhere constraints grid functions to zero to prevent spurious nans
+        CarpetX::CarpetX_InitError: Initialize regridding error to zero
+        Coordinates::Coordinates_Setup: Set coordinate grid functions
+        GROUP ODESolvers_BaseGrid: Set up constants (e.g. coordinates) everywhere on the grid
+      [CCTK_INITIAL]
+        GROUP ADMBase_InitialData: Schedule group for calculating ADM initial data
+          GROUP TwoPunctures_Group: TwoPunctures initial data group
+            TwoPunctures::TwoPunctures: Create puncture black hole initial data
+            TwoPunctures::TwoPunctures_Metadata: [global] Output TwoPunctures metadata
+        GROUP ADMBase_InitialGauge: Schedule group for the ADM initial gauge condition
+          ADMBase::ADMBase_initial_dtlapse: Set dtlapse to zero
+          ADMBase::ADMBase_initial_shift: Set shift to zero
+          ADMBase::ADMBase_initial_dtshift: Set dtshift to zero
+        GROUP ADMBase_PostInitial: Schedule group for modifying the ADM initial data, such as e.g. adding noise
+        GROUP CanudaX_BSSNMoL_InitialGroup: CanudaX : initial bin
+          CanudaX_BSSNMoL::LeanBSSN_slicing_condition: Enforces choice of slicing conditions
+          CanudaX_BSSNMoL::LeanBSSN_adm2bssn: [local] Convert initial data into BSSN variables
+          CanudaX_BSSNMoL::LeanBSSN_gammat: [local] Set Gammat initial data
+          CanudaX_BSSNMoL::CanudaX_Sync: [global] Sync BSSN variables
+        GROUP ODESolvers_Initial: Set up initial conditions on interior of state vector
+        GROUP TmunuBase_SetTmunuVars: Schedule group for setting T_munu
+          TmunuBase::TmunuBase_ZeroTmunu: Set T_munu to zero
+          GROUP TmunuBase_AddToTmunu: Add to T_munu here
+      [CCTK_POSTINITIAL]
+        ErrorEstimator::EstimateError: Estimate error
+        GROUP ODESolvers_PostStep: Apply boundary conditions to state vector, and project if necessary
+          GROUP ADMBase_SetADMVars: Set ADM variables in this group
+          GROUP ADMBase_SetADMRHS: Set ADM RHS variables in this group
+          GROUP CanudaX_BSSNMoL_PostStepGroup: CanudaX : post-step operations
+            CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor: Make sure conformal factor does not drop below specified value
+            CanudaX_BSSNMoL::LeanBSSN_remove_trA: Remove trace of A
+            CanudaX_BSSNMoL::CanudaX_Sync: [global] Sync state vector
+            CanudaX_BSSNMoL::LeanBSSN_bssn2adm: [local] Convert variables back to the ADM ones
+          GROUP TmunuBase_SetTmunuVars: Schedule group for setting T_munu
+            TmunuBase::TmunuBase_ZeroTmunu: Set T_munu to zero
+            GROUP TmunuBase_AddToTmunu: Add to T_munu here
+        GROUP ODESolvers_RHS: Evaluate RHS for of state vector everywhere on the grid
+          GROUP CanudaX_BSSNMoL_RHSGroup: CanudaX : calculate BSSN RHS
+            CanudaX_BSSNMoL::LeanBSSN_CalcRHS: MoL RHS calculation
+            CanudaX_BSSNMoL::LeanBSSN_add_dissipation: Add KO dissipation
+        GROUP ODESolvers_EstimateError: Estimate discretization error (for regridding)
+      Initialise finer grids recursively
+      Restrict from finer grids
+      [CCTK_POSTRESTRICTINITIAL]
+      [CCTK_POSTPOSTINITIAL]
+      [CCTK_POSTSTEP]
+        GROUP ADMBase_SetADMVars: Set ADM variables in this group
+        GROUP ADMBase_SetADMRHS: Set ADM RHS variables in this group
+        ErrorEstimator::EstimateError: Estimate error
+        GROUP ODESolvers_PostStep: Apply boundary conditions to state vector, and project if necessary
+          GROUP ADMBase_SetADMVars: Set ADM variables in this group
+          GROUP ADMBase_SetADMRHS: Set ADM RHS variables in this group
+          GROUP CanudaX_BSSNMoL_PostStepGroup: CanudaX : post-step operations
+            CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor: Make sure conformal factor does not drop below specified value
+            CanudaX_BSSNMoL::LeanBSSN_remove_trA: Remove trace of A
+            CanudaX_BSSNMoL::CanudaX_Sync: [global] Sync state vector
+            CanudaX_BSSNMoL::LeanBSSN_bssn2adm: [local] Convert variables back to the ADM ones
+          GROUP TmunuBase_SetTmunuVars: Schedule group for setting T_munu
+            TmunuBase::TmunuBase_ZeroTmunu: Set T_munu to zero
+            GROUP TmunuBase_AddToTmunu: Add to T_munu here
+        GROUP ODESolvers_RHS: Evaluate the RHS for of state vector everywhere on the grid
+          GROUP CanudaX_BSSNMoL_RHSGroup: CanudaX : calculate BSSN RHS
+            CanudaX_BSSNMoL::LeanBSSN_CalcRHS: MoL RHS calculation
+            CanudaX_BSSNMoL::LeanBSSN_add_dissipation: Add KO dissipation
+        GROUP ODESolvers_EstimateError: Estimate discretization error (for regridding)
+        GROUP TmunuBase_SetTmunuVars: Schedule group for setting T_munu
+          TmunuBase::TmunuBase_ZeroTmunu: Set T_munu to zero
+          GROUP TmunuBase_AddToTmunu: Add to T_munu here
+    endif
+    if (recover initial data)
+      [CCTK_BASEGRID]
+        CanudaX_BSSNMoL::LeanBSSN_zero: Set everywhere grid functions to zero to prevent spurious nans
+        CanudaX_BSSNMoL::LeanBSSN_zero_constr: Set everywhere constraints grid functions to zero to prevent spurious nans
+        CarpetX::CarpetX_InitError: Initialize regridding error to zero
+        Coordinates::Coordinates_Setup: Set coordinate grid functions
+        GROUP ODESolvers_BaseGrid: Set up constants (e.g. coordinates) everywhere on the grid
+      [CCTK_RECOVER_VARIABLES]
+      [CCTK_POST_RECOVER_VARIABLES]
+    endif
+    if (checkpoint initial data)
+      [CCTK_CPINITIAL]
+        CarpetX::CarpetX_CheckpointInitial: [meta] Checkpoint initial conditions
+    endif
+    if (analysis)
+      [CCTK_ANALYSIS]
+        CanudaX_BSSNMoL::LeanBSSN_bssn_constraints: Compute constraints
+        GROUP ODESolvers_Analysis: Calculate analysis quantities everywhere
+        TimerReport::zzz_TimerReport_Output: [global] Print the timer report
+  endif
+  Output grid variables
+
+  do loop over timesteps
+    [CCTK_PREREGRID]
+    Change grid hierarchy
+    [CCTK_POSTREGRID]
+      GROUP ADMBase_SetADMVars: Set ADM variables in this group
+      GROUP ADMBase_SetADMRHS: Set ADM RHS variables in this group
+      GROUP ODESolvers_PostStep: Apply boundary conditions to state vector, and project if necessary
+        GROUP ADMBase_SetADMVars: Set ADM variables in this group
+        GROUP ADMBase_SetADMRHS: Set ADM RHS variables in this group
+        GROUP CanudaX_BSSNMoL_PostStepGroup: CanudaX : post-step operations
+          CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor: Make sure conformal factor does not drop below specified value
+          CanudaX_BSSNMoL::LeanBSSN_remove_trA: Remove trace of A
+          CanudaX_BSSNMoL::CanudaX_Sync: [global] Sync state vector
+          CanudaX_BSSNMoL::LeanBSSN_bssn2adm: [local] Convert variables back to the ADM ones
+        GROUP TmunuBase_SetTmunuVars: Schedule group for setting T_munu
+          TmunuBase::TmunuBase_ZeroTmunu: Set T_munu to zero
+          GROUP TmunuBase_AddToTmunu: Add to T_munu here
+      GROUP TmunuBase_SetTmunuVars: Schedule group for setting T_munu
+        TmunuBase::TmunuBase_ZeroTmunu: Set T_munu to zero
+        GROUP TmunuBase_AddToTmunu: Add to T_munu here
+    Rotate timelevels
+    iteration = iteration+1
+    t = t+dt
+    [CCTK_PRESTEP]
+    [CCTK_EVOL]
+      ODESolvers::ODESolvers_Solve: [level] Solve ODEs
+    Evolve finer grids recursively
+    Restrict from finer grids
+    [CCTK_POSTRESTRICT]
+      GROUP ODESolvers_PostStep: Apply boundary conditions to state vector, and project if necessary
+        GROUP ADMBase_SetADMVars: Set ADM variables in this group
+        GROUP ADMBase_SetADMRHS: Set ADM RHS variables in this group
+        GROUP CanudaX_BSSNMoL_PostStepGroup: CanudaX : post-step operations
+          CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor: Make sure conformal factor does not drop below specified value
+          CanudaX_BSSNMoL::LeanBSSN_remove_trA: Remove trace of A
+          CanudaX_BSSNMoL::CanudaX_Sync: [global] Sync state vector
+          CanudaX_BSSNMoL::LeanBSSN_bssn2adm: [local] Convert variables back to the ADM ones
+        GROUP TmunuBase_SetTmunuVars: Schedule group for setting T_munu
+          TmunuBase::TmunuBase_ZeroTmunu: Set T_munu to zero
+          GROUP TmunuBase_AddToTmunu: Add to T_munu here
+    [CCTK_POSTSTEP]
+      GROUP ADMBase_SetADMVars: Set ADM variables in this group
+      GROUP ADMBase_SetADMRHS: Set ADM RHS variables in this group
+      ErrorEstimator::EstimateError: Estimate error
+      GROUP ODESolvers_PostStep: Apply boundary conditions to state vector, and project if necessary
+        GROUP ADMBase_SetADMVars: Set ADM variables in this group
+        GROUP ADMBase_SetADMRHS: Set ADM RHS variables in this group
+        GROUP CanudaX_BSSNMoL_PostStepGroup: CanudaX : post-step operations
+          CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor: Make sure conformal factor does not drop below specified value
+          CanudaX_BSSNMoL::LeanBSSN_remove_trA: Remove trace of A
+          CanudaX_BSSNMoL::CanudaX_Sync: [global] Sync state vector
+          CanudaX_BSSNMoL::LeanBSSN_bssn2adm: [local] Convert variables back to the ADM ones
+        GROUP TmunuBase_SetTmunuVars: Schedule group for setting T_munu
+          TmunuBase::TmunuBase_ZeroTmunu: Set T_munu to zero
+          GROUP TmunuBase_AddToTmunu: Add to T_munu here
+      GROUP ODESolvers_RHS: Evaluate the RHS for of state vector everywhere on the grid
+        GROUP CanudaX_BSSNMoL_RHSGroup: CanudaX : calculate BSSN RHS
+          CanudaX_BSSNMoL::LeanBSSN_CalcRHS: MoL RHS calculation
+          CanudaX_BSSNMoL::LeanBSSN_add_dissipation: Add KO dissipation
+      GROUP ODESolvers_EstimateError: Estimate discretization error (for regridding)
+      GROUP TmunuBase_SetTmunuVars: Schedule group for setting T_munu
+        TmunuBase::TmunuBase_ZeroTmunu: Set T_munu to zero
+        GROUP TmunuBase_AddToTmunu: Add to T_munu here
+    if (checkpoint)
+      [CCTK_CHECKPOINT]
+      CarpetX::CarpetX_Checkpoint: [meta] Checkpoint
+      TimerReport::zzz_TimerReport_Checkpoint: [global] Print the timer report
+    endif
+    if (analysis)
+      [CCTK_ANALYSIS]
+      CanudaX_BSSNMoL::LeanBSSN_bssn_constraints: Compute constraints
+      GROUP ODESolvers_Analysis: Calculate analysis quantities everywhere
+      TimerReport::zzz_TimerReport_Output: [global] Print the timer report
+    endif
+    Output grid variables
+    enddo
+
+  Termination routines
+    [CCTK_TERMINATE]
+      CarpetX::CarpetX_CheckpointTerminate: [meta] Checkpoint before terminating
+      TimerReport::zzz_TimerReport_Output: [global] Print the timer report
+
+  Shutdown routines
+    [CCTK_SHUTDOWN]
+      CarpetX::Driver_Shutdown: [meta] Shut down the driver
+
+  Routines run after changing the grid hierarchy:
+    [CCTK_POSTREGRID]
+      GROUP ADMBase_SetADMVars: Set ADM variables in this group
+      GROUP ADMBase_SetADMRHS: Set ADM RHS variables in this group
+      GROUP ODESolvers_PostStep: Apply boundary conditions to state vector, and project if necessary
+        GROUP ADMBase_SetADMVars: Set ADM variables in this group
+        GROUP ADMBase_SetADMRHS: Set ADM RHS variables in this group
+        GROUP CanudaX_BSSNMoL_PostStepGroup: CanudaX : post-step operations
+          CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor: Make sure conformal factor does not drop below specified value
+          CanudaX_BSSNMoL::LeanBSSN_remove_trA: Remove trace of A
+          CanudaX_BSSNMoL::CanudaX_Sync: [global] Sync state vector
+          CanudaX_BSSNMoL::LeanBSSN_bssn2adm: [local] Convert variables back to the ADM ones
+        GROUP TmunuBase_SetTmunuVars: Schedule group for setting T_munu
+          TmunuBase::TmunuBase_ZeroTmunu: Set T_munu to zero
+          GROUP TmunuBase_AddToTmunu: Add to T_munu here
+      GROUP TmunuBase_SetTmunuVars: Schedule group for setting T_munu
+        TmunuBase::TmunuBase_ZeroTmunu: Set T_munu to zero
+        GROUP TmunuBase_AddToTmunu: Add to T_munu here
+--------------------------------------------------------------------------------
+INFO (CarpetX): Startup
+INFO (hwloc): library version 2.2.0, API version 0x20100
+--------------------------------------------------------------------------------
+
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [39m  
+  [34m──██──[32m██████[34m──██──[34m──██──[32m██████[34m──██──[34m──██──[32m██████[34m──██──[39m  
+  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [31m██████[31m██████[31m██████[34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m──██──[34m──██──[34m──██──[31m██████[31m██████[31m██████[34m──██──[34m──██──[34m──██──[39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [31m██████[31m██████[31m██████[34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m  ▕▏  [32m██████[34m  ▕▏  [31m██████[31m██████[31m██████[34m  ▕▏  [32m██████[34m  ▕▏  [39m  
+  [34m──██──[32m██████[34m──██──[31m██████[31m██████[31m██████[34m──██──[32m██████[34m──██──[39m  
+  [34m  ▕▏  [32m██████[34m  ▕▏  [31m██████[31m██████[31m██████[34m  ▕▏  [32m██████[34m  ▕▏  [39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [31m██████[31m██████[31m██████[34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m──██──[34m──██──[34m──██──[31m██████[31m██████[31m██████[34m──██──[34m──██──[34m──██──[39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [31m██████[31m██████[31m██████[34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [39m  
+  [34m──██──[32m██████[34m──██──[34m──██──[32m██████[34m──██──[34m──██──[32m██████[34m──██──[39m  
+  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+
+AMR driver provided by CarpetX,
+using AMReX 23.05 (MPI, OpenMP, no accelerators, debug)
+--------------------------------------------------------------------------------
+
+INFO (CarpetX): SetupGH
+MPI initialized with 128 MPI processes
+MPI initialized with thread support level 2
+OMP initialized with 1 OMP threads
+AMReX (23.05) initialized
+INFO (CarpetX): InitGH
+INFO (CarpetX): 
+Symmetries:
+  lower x: periodic
+  lower y: periodic
+  lower z: periodic
+  upper x: periodic
+  upper y: periodic
+  upper z: periodic
+Default boundaries:
+  lower x: symmetry_boundary
+  lower y: symmetry_boundary
+  lower z: symmetry_boundary
+  upper x: symmetry_boundary
+  upper y: symmetry_boundary
+  upper z: symmetry_boundary
+INFO (CarpetX): SetupGlobals
+INFO (CarpetX): amrex::Geometry level 0:
+(0 (-64,-64,-64)(0.5,0.5,0.5) 1)
+(RealBox -64 64 -64 64 -64 64 )((0,0,0) (255,255,255) (0,0,0))P(1,1,1)
+INFO (CarpetX): amrex::Geometry level 1:
+(0 (-64,-64,-64)(0.25,0.25,0.25) 1)
+(RealBox -64 64 -64 64 -64 64 )((0,0,0) (511,511,511) (0,0,0))P(1,1,1)
+INFO (CarpetX): amrex::Geometry level 2:
+(0 (-64,-64,-64)(0.125,0.125,0.125) 1)
+(RealBox -64 64 -64 64 -64 64 )((0,0,0) (1023,1023,1023) (0,0,0))P(1,1,1)
+INFO (CarpetX): amrex::Geometry level 3:
+(0 (-64,-64,-64)(0.0625,0.0625,0.0625) 1)
+(RealBox -64 64 -64 64 -64 64 )((0,0,0) (2047,2047,2047) (0,0,0))P(1,1,1)
+INFO (CarpetX): amrex::Geometry level 4:
+(0 (-64,-64,-64)(0.03125,0.03125,0.03125) 1)
+(RealBox -64 64 -64 64 -64 64 )((0,0,0) (4095,4095,4095) (0,0,0))P(1,1,1)
+INFO (CarpetX): amrex::Geometry level 5:
+(0 (-64,-64,-64)(0.015625,0.015625,0.015625) 1)
+(RealBox -64 64 -64 64 -64 64 )((0,0,0) (8191,8191,8191) (0,0,0))P(1,1,1)
+INFO (CarpetX): ScheduleTraverseGH iteration 0 CCTK_WRAGH
+INFO (CarpetX): CallFunction iteration 0 CCTK_WRAGH: Arith::Test_smallvector
+INFO (Arith): Test_smallvector
+INFO (CarpetX): CallFunction iteration 0 CCTK_WRAGH: Arith::Test_spvect
+INFO (Arith): Test_spvect
+INFO (CarpetX): ScheduleTraverseGH iteration 0 CCTK_PARAMCHECK
+INFO (CarpetX): CallFunction iteration 0 CCTK_PARAMCHECK: CanudaX_BSSNMoL::Lean_ParamCheck
+INFO (CarpetX): CallFunction iteration 0 CCTK_PARAMCHECK: TwoPunctures::TwoPunctures_ParamCheck
+INFO (CarpetX): Setting up initial conditions...
+INFO (CarpetX): MakeNewLevelFromScratch patch 0 level 0
+INFO (CarpetX): SetupLevel patch 0 level 0
+INFO (CarpetX): SetupLevel patch 0 level 0 done.
+INFO (CarpetX): MakeNewLevelFromScratch patch 0 level 0 done.
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 0.125
+INFO (CarpetX): ScheduleTraverseGH iteration 0 CCTK_BASEGRID
+INFO (CarpetX): CallFunction iteration 0 CCTK_BASEGRID: CanudaX_BSSNMoL::LeanBSSN_zero
+INFO (CarpetX): CallFunction iteration 0 CCTK_BASEGRID: CanudaX_BSSNMoL::LeanBSSN_zero_constr
+INFO (CarpetX): CallFunction iteration 0 CCTK_BASEGRID: CarpetX::CarpetX_InitError
+INFO (CarpetX): CallFunction iteration 0 CCTK_BASEGRID: Coordinates::Coordinates_Setup
+INFO (CarpetX): Patch 0:
+INFO (CarpetX):   Grid extent:
+INFO (CarpetX):     gsh=[263,263,263]
+INFO (CarpetX):     blocking_factor=[8,8,8]
+INFO (CarpetX):     max_grid_size=[32,32,32]
+INFO (CarpetX):     max_tile_size=[1024000,16,32]
+INFO (CarpetX):   Domain extent:
+INFO (CarpetX):     xmin=[-64,-64,-64]
+INFO (CarpetX):     xmax=[64,64,64]
+INFO (CarpetX):     base dx=[0.5,0.5,0.5]
+INFO (CarpetX): Initializing level 0...
+INFO (CarpetX): ScheduleTraverseGH iteration 0 CCTK_INITIAL
+INFO (CarpetX): CallFunction iteration 0 TwoPunctures_Group: TwoPunctures::TwoPunctures
+INFO (TwoPunctures): Solving puncture equation for BH-BH system
+INFO (TwoPunctures): b = 1e-05
+INFO (TwoPunctures): Attempting to find bare masses.
+INFO (TwoPunctures): Target ADM masses: M_p=1 and M_m=0
+INFO (TwoPunctures): ADM mass tolerance: 1e-10
+INFO (TwoPunctures): Bare masses: mp=1, mm=0
+INFO (TwoPunctures): ADM mass error: M_p_err=0, M_m_err=0
+INFO (TwoPunctures): Found bare masses.
+INFO (TwoPunctures): The two puncture masses are mp=1 and mm=0
+INFO (TwoPunctures): Puncture 1 ADM mass is 1
+INFO (TwoPunctures): Puncture 2 ADM mass is 0
+INFO (TwoPunctures): The total ADM mass is 1
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Interpolating result
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (CarpetX): CallFunction iteration 0 TwoPunctures_Group: TwoPunctures::TwoPunctures_Metadata
+INFO (CarpetX): CallFunction iteration 0 ADMBase_InitialGauge: ADMBase::ADMBase_initial_dtlapse
+INFO (CarpetX): CallFunction iteration 0 ADMBase_InitialGauge: ADMBase::ADMBase_initial_shift
+INFO (CarpetX): CallFunction iteration 0 ADMBase_InitialGauge: ADMBase::ADMBase_initial_dtshift
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_slicing_condition
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_adm2bssn
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_gammat
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 0 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 0 CCTK_POSTINITIAL
+INFO (CarpetX): CallFunction iteration 0 CCTK_POSTINITIAL: ErrorEstimator::EstimateError
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 0 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): ScheduleTraverseGH iteration 0 CCTK_POSTPOSTINITIAL
+INFO (CarpetX): Regridding...
+INFO (CarpetX): ErrorEst patch 0 level 0
+INFO (CarpetX): ErrorEst patch 0 level 0 done. Set/clear/total=0/131072/131072=0%/100%/100%
+INFO (CarpetX): MakeNewLevelFromCoarse patch 0 level 1
+INFO (CarpetX): SetupLevel patch 0 level 1
+INFO (CarpetX): SetupLevel patch 0 level 1 done.
+INFO (CarpetX): MakeNewLevelFromCoarse patch 0 level 1 done.
+INFO (CarpetX):   level 0: 512 boxes, 16777216 cells (100%)
+INFO (CarpetX):   level 1: 216 boxes, 110592 cells (0.0824%, 0%)
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 0.0625
+INFO (CarpetX): ScheduleTraverseGH iteration 0 CCTK_BASEGRID
+INFO (CarpetX): CallFunction iteration 0 CCTK_BASEGRID: CanudaX_BSSNMoL::LeanBSSN_zero
+INFO (CarpetX): CallFunction iteration 0 CCTK_BASEGRID: CanudaX_BSSNMoL::LeanBSSN_zero_constr
+INFO (CarpetX): CallFunction iteration 0 CCTK_BASEGRID: CarpetX::CarpetX_InitError
+INFO (CarpetX): CallFunction iteration 0 CCTK_BASEGRID: Coordinates::Coordinates_Setup
+INFO (CarpetX): ScheduleTraverseGH iteration 0 CCTK_POSTREGRID
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 0 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 0 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): Initializing level 1...
+INFO (CarpetX): ScheduleTraverseGH iteration 0 CCTK_INITIAL
+INFO (CarpetX): CallFunction iteration 0 TwoPunctures_Group: TwoPunctures::TwoPunctures
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (CarpetX): CallFunction iteration 0 TwoPunctures_Group: TwoPunctures::TwoPunctures_Metadata
+INFO (CarpetX): CallFunction iteration 0 ADMBase_InitialGauge: ADMBase::ADMBase_initial_dtlapse
+INFO (CarpetX): CallFunction iteration 0 ADMBase_InitialGauge: ADMBase::ADMBase_initial_shift
+INFO (CarpetX): CallFunction iteration 0 ADMBase_InitialGauge: ADMBase::ADMBase_initial_dtshift
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_slicing_condition
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_adm2bssn
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_gammat
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 0 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 0 CCTK_POSTINITIAL
+INFO (CarpetX): CallFunction iteration 0 CCTK_POSTINITIAL: ErrorEstimator::EstimateError
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 0 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): ScheduleTraverseGH iteration 0 CCTK_POSTPOSTINITIAL
+INFO (CarpetX): Regridding...
+INFO (CarpetX): ErrorEst patch 0 level 1
+INFO (CarpetX): ErrorEst patch 0 level 1 done. Set/clear/total=0/1024/1024=0%/100%/100%
+INFO (CarpetX): ErrorEst patch 0 level 0
+INFO (CarpetX): ErrorEst patch 0 level 0 done. Set/clear/total=0/131072/131072=0%/100%/100%
+INFO (CarpetX): MakeNewLevelFromCoarse patch 0 level 2
+INFO (CarpetX): SetupLevel patch 0 level 2
+INFO (CarpetX): SetupLevel patch 0 level 2 done.
+INFO (CarpetX): MakeNewLevelFromCoarse patch 0 level 2 done.
+INFO (CarpetX):   level 0: 512 boxes, 16777216 cells (100%)
+INFO (CarpetX):   level 1: 216 boxes, 110592 cells (0.0824%, 0%)
+INFO (CarpetX):   level 2: 216 boxes, 110592 cells (0.0103%, 12%)
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 0.03125
+INFO (CarpetX): ScheduleTraverseGH iteration 0 CCTK_BASEGRID
+INFO (CarpetX): CallFunction iteration 0 CCTK_BASEGRID: CanudaX_BSSNMoL::LeanBSSN_zero
+INFO (CarpetX): CallFunction iteration 0 CCTK_BASEGRID: CanudaX_BSSNMoL::LeanBSSN_zero_constr
+INFO (CarpetX): CallFunction iteration 0 CCTK_BASEGRID: CarpetX::CarpetX_InitError
+INFO (CarpetX): CallFunction iteration 0 CCTK_BASEGRID: Coordinates::Coordinates_Setup
+INFO (CarpetX): ScheduleTraverseGH iteration 0 CCTK_POSTREGRID
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 0 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 0 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): Initializing level 2...
+INFO (CarpetX): ScheduleTraverseGH iteration 0 CCTK_INITIAL
+INFO (CarpetX): CallFunction iteration 0 TwoPunctures_Group: TwoPunctures::TwoPunctures
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (CarpetX): CallFunction iteration 0 TwoPunctures_Group: TwoPunctures::TwoPunctures_Metadata
+INFO (CarpetX): CallFunction iteration 0 ADMBase_InitialGauge: ADMBase::ADMBase_initial_dtlapse
+INFO (CarpetX): CallFunction iteration 0 ADMBase_InitialGauge: ADMBase::ADMBase_initial_shift
+INFO (CarpetX): CallFunction iteration 0 ADMBase_InitialGauge: ADMBase::ADMBase_initial_dtshift
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_slicing_condition
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_adm2bssn
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_gammat
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 0 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 0 CCTK_POSTINITIAL
+INFO (CarpetX): CallFunction iteration 0 CCTK_POSTINITIAL: ErrorEstimator::EstimateError
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 0 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): ScheduleTraverseGH iteration 0 CCTK_POSTPOSTINITIAL
+INFO (CarpetX): Regridding...
+INFO (CarpetX): ErrorEst patch 0 level 2
+INFO (CarpetX): ErrorEst patch 0 level 2 done. Set/clear/total=0/1024/1024=0%/100%/100%
+INFO (CarpetX): ErrorEst patch 0 level 1
+INFO (CarpetX): ErrorEst patch 0 level 1 done. Set/clear/total=0/1024/1024=0%/100%/100%
+INFO (CarpetX): ErrorEst patch 0 level 0
+INFO (CarpetX): ErrorEst patch 0 level 0 done. Set/clear/total=0/131072/131072=0%/100%/100%
+INFO (CarpetX): MakeNewLevelFromCoarse patch 0 level 3
+INFO (CarpetX): SetupLevel patch 0 level 3
+INFO (CarpetX): SetupLevel patch 0 level 3 done.
+INFO (CarpetX): MakeNewLevelFromCoarse patch 0 level 3 done.
+INFO (CarpetX):   level 0: 512 boxes, 16777216 cells (100%)
+INFO (CarpetX):   level 1: 216 boxes, 110592 cells (0.0824%, 0%)
+INFO (CarpetX):   level 2: 216 boxes, 110592 cells (0.0103%, 12%)
+INFO (CarpetX):   level 3: 216 boxes, 110592 cells (0.001287%, 12%)
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 0.015625
+INFO (CarpetX): ScheduleTraverseGH iteration 0 CCTK_BASEGRID
+INFO (CarpetX): CallFunction iteration 0 CCTK_BASEGRID: CanudaX_BSSNMoL::LeanBSSN_zero
+INFO (CarpetX): CallFunction iteration 0 CCTK_BASEGRID: CanudaX_BSSNMoL::LeanBSSN_zero_constr
+INFO (CarpetX): CallFunction iteration 0 CCTK_BASEGRID: CarpetX::CarpetX_InitError
+INFO (CarpetX): CallFunction iteration 0 CCTK_BASEGRID: Coordinates::Coordinates_Setup
+INFO (CarpetX): ScheduleTraverseGH iteration 0 CCTK_POSTREGRID
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 0 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 0 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): Initializing level 3...
+INFO (CarpetX): ScheduleTraverseGH iteration 0 CCTK_INITIAL
+INFO (CarpetX): CallFunction iteration 0 TwoPunctures_Group: TwoPunctures::TwoPunctures
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (CarpetX): CallFunction iteration 0 TwoPunctures_Group: TwoPunctures::TwoPunctures_Metadata
+INFO (CarpetX): CallFunction iteration 0 ADMBase_InitialGauge: ADMBase::ADMBase_initial_dtlapse
+INFO (CarpetX): CallFunction iteration 0 ADMBase_InitialGauge: ADMBase::ADMBase_initial_shift
+INFO (CarpetX): CallFunction iteration 0 ADMBase_InitialGauge: ADMBase::ADMBase_initial_dtshift
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_slicing_condition
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_adm2bssn
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_gammat
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 0 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 0 CCTK_POSTINITIAL
+INFO (CarpetX): CallFunction iteration 0 CCTK_POSTINITIAL: ErrorEstimator::EstimateError
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 0 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): ScheduleTraverseGH iteration 0 CCTK_POSTPOSTINITIAL
+INFO (CarpetX): Regridding...
+INFO (CarpetX): ErrorEst patch 0 level 3
+INFO (CarpetX): ErrorEst patch 0 level 3 done. Set/clear/total=0/1024/1024=0%/100%/100%
+INFO (CarpetX): ErrorEst patch 0 level 2
+INFO (CarpetX): ErrorEst patch 0 level 2 done. Set/clear/total=0/1024/1024=0%/100%/100%
+INFO (CarpetX): ErrorEst patch 0 level 1
+INFO (CarpetX): ErrorEst patch 0 level 1 done. Set/clear/total=0/1024/1024=0%/100%/100%
+INFO (CarpetX): ErrorEst patch 0 level 0
+INFO (CarpetX): ErrorEst patch 0 level 0 done. Set/clear/total=0/131072/131072=0%/100%/100%
+INFO (CarpetX): MakeNewLevelFromCoarse patch 0 level 4
+INFO (CarpetX): SetupLevel patch 0 level 4
+INFO (CarpetX): SetupLevel patch 0 level 4 done.
+INFO (CarpetX): MakeNewLevelFromCoarse patch 0 level 4 done.
+INFO (CarpetX):   level 0: 512 boxes, 16777216 cells (100%)
+INFO (CarpetX):   level 1: 216 boxes, 110592 cells (0.0824%, 0%)
+INFO (CarpetX):   level 2: 216 boxes, 110592 cells (0.0103%, 12%)
+INFO (CarpetX):   level 3: 216 boxes, 110592 cells (0.001287%, 12%)
+INFO (CarpetX):   level 4: 216 boxes, 110592 cells (0.0001609%, 12%)
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 0.0078125
+INFO (CarpetX): ScheduleTraverseGH iteration 0 CCTK_BASEGRID
+INFO (CarpetX): CallFunction iteration 0 CCTK_BASEGRID: CanudaX_BSSNMoL::LeanBSSN_zero
+INFO (CarpetX): CallFunction iteration 0 CCTK_BASEGRID: CanudaX_BSSNMoL::LeanBSSN_zero_constr
+INFO (CarpetX): CallFunction iteration 0 CCTK_BASEGRID: CarpetX::CarpetX_InitError
+INFO (CarpetX): CallFunction iteration 0 CCTK_BASEGRID: Coordinates::Coordinates_Setup
+INFO (CarpetX): ScheduleTraverseGH iteration 0 CCTK_POSTREGRID
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 0 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 0 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): Initializing level 4...
+INFO (CarpetX): ScheduleTraverseGH iteration 0 CCTK_INITIAL
+INFO (CarpetX): CallFunction iteration 0 TwoPunctures_Group: TwoPunctures::TwoPunctures
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (CarpetX): CallFunction iteration 0 TwoPunctures_Group: TwoPunctures::TwoPunctures_Metadata
+INFO (CarpetX): CallFunction iteration 0 ADMBase_InitialGauge: ADMBase::ADMBase_initial_dtlapse
+INFO (CarpetX): CallFunction iteration 0 ADMBase_InitialGauge: ADMBase::ADMBase_initial_shift
+INFO (CarpetX): CallFunction iteration 0 ADMBase_InitialGauge: ADMBase::ADMBase_initial_dtshift
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_slicing_condition
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_adm2bssn
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_gammat
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 0 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 0 CCTK_POSTINITIAL
+INFO (CarpetX): CallFunction iteration 0 CCTK_POSTINITIAL: ErrorEstimator::EstimateError
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 0 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): ScheduleTraverseGH iteration 0 CCTK_POSTPOSTINITIAL
+INFO (CarpetX): Regridding...
+INFO (CarpetX): ErrorEst patch 0 level 4
+INFO (CarpetX): ErrorEst patch 0 level 4 done. Set/clear/total=0/512/512=0%/100%/100%
+INFO (CarpetX): ErrorEst patch 0 level 3
+INFO (CarpetX): ErrorEst patch 0 level 3 done. Set/clear/total=0/1024/1024=0%/100%/100%
+INFO (CarpetX): ErrorEst patch 0 level 2
+INFO (CarpetX): ErrorEst patch 0 level 2 done. Set/clear/total=0/1024/1024=0%/100%/100%
+INFO (CarpetX): ErrorEst patch 0 level 1
+INFO (CarpetX): ErrorEst patch 0 level 1 done. Set/clear/total=0/1024/1024=0%/100%/100%
+INFO (CarpetX): ErrorEst patch 0 level 0
+INFO (CarpetX): ErrorEst patch 0 level 0 done. Set/clear/total=0/131072/131072=0%/100%/100%
+INFO (CarpetX): MakeNewLevelFromCoarse patch 0 level 5
+INFO (CarpetX): SetupLevel patch 0 level 5
+INFO (CarpetX): SetupLevel patch 0 level 5 done.
+INFO (CarpetX): MakeNewLevelFromCoarse patch 0 level 5 done.
+INFO (CarpetX):   level 0: 512 boxes, 16777216 cells (100%)
+INFO (CarpetX):   level 1: 216 boxes, 110592 cells (0.0824%, 0%)
+INFO (CarpetX):   level 2: 216 boxes, 110592 cells (0.0103%, 12%)
+INFO (CarpetX):   level 3: 216 boxes, 110592 cells (0.001287%, 12%)
+INFO (CarpetX):   level 4: 216 boxes, 110592 cells (0.0001609%, 12%)
+INFO (CarpetX):   level 5: 216 boxes, 110592 cells (2.012e-05%, 12%)
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 0.00390625
+INFO (CarpetX): ScheduleTraverseGH iteration 0 CCTK_BASEGRID
+INFO (CarpetX): CallFunction iteration 0 CCTK_BASEGRID: CanudaX_BSSNMoL::LeanBSSN_zero
+INFO (CarpetX): CallFunction iteration 0 CCTK_BASEGRID: CanudaX_BSSNMoL::LeanBSSN_zero_constr
+INFO (CarpetX): CallFunction iteration 0 CCTK_BASEGRID: CarpetX::CarpetX_InitError
+INFO (CarpetX): CallFunction iteration 0 CCTK_BASEGRID: Coordinates::Coordinates_Setup
+INFO (CarpetX): ScheduleTraverseGH iteration 0 CCTK_POSTREGRID
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 0 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 0 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): Initializing level 5...
+INFO (CarpetX): ScheduleTraverseGH iteration 0 CCTK_INITIAL
+INFO (CarpetX): CallFunction iteration 0 TwoPunctures_Group: TwoPunctures::TwoPunctures
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (CarpetX): CallFunction iteration 0 TwoPunctures_Group: TwoPunctures::TwoPunctures_Metadata
+INFO (CarpetX): CallFunction iteration 0 ADMBase_InitialGauge: ADMBase::ADMBase_initial_dtlapse
+INFO (CarpetX): CallFunction iteration 0 ADMBase_InitialGauge: ADMBase::ADMBase_initial_shift
+INFO (CarpetX): CallFunction iteration 0 ADMBase_InitialGauge: ADMBase::ADMBase_initial_dtshift
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_slicing_condition
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_adm2bssn
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_gammat
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 0 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 0 CCTK_POSTINITIAL
+INFO (CarpetX): CallFunction iteration 0 CCTK_POSTINITIAL: ErrorEstimator::EstimateError
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 0 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): ScheduleTraverseGH iteration 0 CCTK_POSTPOSTINITIAL
+INFO (CarpetX): Regridding...
+INFO (CarpetX): ErrorEst patch 0 level 4
+INFO (CarpetX): ErrorEst patch 0 level 4 done. Set/clear/total=0/512/512=0%/100%/100%
+INFO (CarpetX): ErrorEst patch 0 level 3
+INFO (CarpetX): ErrorEst patch 0 level 3 done. Set/clear/total=0/1024/1024=0%/100%/100%
+INFO (CarpetX): ErrorEst patch 0 level 2
+INFO (CarpetX): ErrorEst patch 0 level 2 done. Set/clear/total=0/1024/1024=0%/100%/100%
+INFO (CarpetX): ErrorEst patch 0 level 1
+INFO (CarpetX): ErrorEst patch 0 level 1 done. Set/clear/total=0/1024/1024=0%/100%/100%
+INFO (CarpetX): ErrorEst patch 0 level 0
+INFO (CarpetX): ErrorEst patch 0 level 0 done. Set/clear/total=0/131072/131072=0%/100%/100%
+INFO (CarpetX):   level 0: 512 boxes, 16777216 cells (100%)
+INFO (CarpetX):   level 1: 216 boxes, 110592 cells (0.0824%, 0%)
+INFO (CarpetX):   level 2: 216 boxes, 110592 cells (0.0103%, 12%)
+INFO (CarpetX):   level 3: 216 boxes, 110592 cells (0.001287%, 12%)
+INFO (CarpetX):   level 4: 216 boxes, 110592 cells (0.0001609%, 12%)
+INFO (CarpetX):   level 5: 216 boxes, 110592 cells (2.012e-05%, 12%)
+INFO (CarpetX): Initialized 6 levels
+INFO (CarpetX): ScheduleTraverseGH iteration 0 CCTK_POSTRESTRICT
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 0 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 0 CCTK_POSTSTEP
+INFO (CarpetX): CallFunction iteration 0 CCTK_POSTSTEP: ErrorEstimator::EstimateError
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 0 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 0 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 0 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 0 CCTK_CPINITIAL
+INFO (CarpetX): CallFunction iteration 0 CCTK_CPINITIAL: CarpetX::CarpetX_CheckpointInitial
+INFO (CarpetX): ScheduleTraverseGH iteration 0 CCTK_ANALYSIS
+INFO (CarpetX): CallFunction iteration 0 CCTK_ANALYSIS: CanudaX_BSSNMoL::LeanBSSN_bssn_constraints
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HAM, CANUDAX_BSSNMOL::MOM
+INFO (CarpetX): CallFunction iteration 0 CCTK_ANALYSIS: TimerReport::zzz_TimerReport_Output
+INFO (TimerReport): Timer Report at iteration 0 time 0
+INFO (TimerReport): Top timers at iteration 0 time 0
+======================================================================
+    %    Time/s   Min/s   Max/s   Timer (gettimeofday)
+======================================================================
+100.0    8.2453  7.6382 10.0573   Sync
+ 37.1    3.0601  1.6174  3.5737   InitialiseRegrid [refined]
+ 34.4    2.8333  2.5049  3.1073   CallFunction CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+ 31.1    2.5652  2.4405  2.7735   [0011] TwoPunctures: TwoPunctures in CCTK_INITIAL
+ 31.1    2.5651  2.4405  2.7734   CallFunction TwoPunctures_Group: TwoPunctures::TwoPunctures
+ 29.7    2.4514  2.1261  2.7252   [0027] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in CCTK_POSTINITIAL
+  7.1    0.5820  0.4819  0.6605   CallFunction CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+  6.1    0.5040  0.4026  0.5774   [0028] CanudaX_BSSNMoL: LeanBSSN_add_dissipation in CCTK_POSTINITIAL
+  4.6    0.3820  0.3639  0.3979   [0045] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in CCTK_POSTSTEP
+  3.8    0.3155  0.2199  0.3690   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+  3.4    0.2774  0.2349  0.3499   [0017] CanudaX_BSSNMoL: LeanBSSN_adm2bssn in CCTK_INITIAL
+  3.4    0.2773  0.2349  0.3499   CallFunction CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_adm2bssn
+  2.9    0.2381  0.1563  0.2796   [0025] CanudaX_BSSNMoL: LeanBSSN_bssn2adm in CCTK_POSTINITIAL
+  2.4    0.2001  0.1922  0.2132   InitialiseRegrid [coarse]
+  2.2    0.1808  0.1735  0.1943   [0048] CanudaX_BSSNMoL: LeanBSSN_bssn_constraints in CCTK_ANALYSIS
+  2.2    0.1808  0.1735  0.1942   CallFunction CCTK_ANALYSIS: CanudaX_BSSNMoL::LeanBSSN_bssn_constraints
+  2.1    0.1708  0.1458  0.1925   CallFunction TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+  1.7    0.1435  0.1290  0.2312   [0018] CanudaX_BSSNMoL: LeanBSSN_gammat in CCTK_INITIAL
+  1.7    0.1434  0.1289  0.2311   CallFunction CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_gammat
+  1.4    0.1194  0.1110  0.1264   [0007] CanudaX_BSSNMoL: LeanBSSN_zero in CCTK_BASEGRID
+======================================================================
+INFO (CarpetX): OutputGH: iteration 0, time 0.000000, run time 22 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Starting evolution...
+INFO (CarpetX): ScheduleTraverseGH iteration 1 CCTK_PRESTEP
+INFO (CarpetX): ScheduleTraverseGH iteration 1 CCTK_EVOL
+INFO (CarpetX): CallFunction iteration 1 CCTK_EVOL: ODESolvers::ODESolvers_Solve
+INFO (ODESolvers): Integrator is RK4
+INFO (CarpetX): CallFunction iteration 1 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 1 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 1 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 1 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 1 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 1 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 1 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 1 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 1 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 1 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 1 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 1 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 1 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 1 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 1 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 1 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 1 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 1 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 1 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 1 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 1 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 1 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 1 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 1 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 1 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 1 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 1 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 1 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 1 CCTK_POSTRESTRICT
+INFO (CarpetX): CallFunction iteration 1 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 1 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 1 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 1 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 1 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 1 CCTK_POSTSTEP
+INFO (CarpetX): CallFunction iteration 1 CCTK_POSTSTEP: ErrorEstimator::EstimateError
+INFO (CarpetX): CallFunction iteration 1 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 1 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 1 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 1 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 1 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 1 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 1 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 1 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 1 CCTK_CHECKPOINT
+INFO (CarpetX): CallFunction iteration 1 CCTK_CHECKPOINT: CarpetX::CarpetX_Checkpoint
+INFO (CarpetX): CallFunction iteration 1 CCTK_CHECKPOINT: TimerReport::zzz_TimerReport_Checkpoint
+INFO (CarpetX): ScheduleTraverseGH iteration 1 CCTK_ANALYSIS
+INFO (CarpetX): CallFunction iteration 1 CCTK_ANALYSIS: CanudaX_BSSNMoL::LeanBSSN_bssn_constraints
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HAM, CANUDAX_BSSNMOL::MOM
+INFO (CarpetX): CallFunction iteration 1 CCTK_ANALYSIS: TimerReport::zzz_TimerReport_Output
+INFO (CarpetX): OutputGH: iteration 1, time 0.003906, run time 33 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.00390625   Iterations per second: 0.0850353   Simulation time per second: 0.000332169
+INFO (CarpetX): Grid cells: 1.73302e+07   Grid cell updates per second: 1.47368e+06
+INFO (CarpetX): ScheduleTraverseGH iteration 2 CCTK_PRESTEP
+INFO (CarpetX): ScheduleTraverseGH iteration 2 CCTK_EVOL
+INFO (CarpetX): CallFunction iteration 2 CCTK_EVOL: ODESolvers::ODESolvers_Solve
+INFO (CarpetX): CallFunction iteration 2 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 2 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 2 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 2 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 2 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 2 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 2 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 2 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 2 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 2 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 2 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 2 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 2 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 2 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 2 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 2 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 2 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 2 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 2 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 2 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 2 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 2 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 2 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 2 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 2 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 2 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 2 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 2 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 2 CCTK_POSTRESTRICT
+INFO (CarpetX): CallFunction iteration 2 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 2 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 2 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 2 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 2 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 2 CCTK_POSTSTEP
+INFO (CarpetX): CallFunction iteration 2 CCTK_POSTSTEP: ErrorEstimator::EstimateError
+INFO (CarpetX): CallFunction iteration 2 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 2 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 2 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 2 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 2 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 2 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 2 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 2 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 2 CCTK_CHECKPOINT
+INFO (CarpetX): CallFunction iteration 2 CCTK_CHECKPOINT: CarpetX::CarpetX_Checkpoint
+INFO (CarpetX): CallFunction iteration 2 CCTK_CHECKPOINT: TimerReport::zzz_TimerReport_Checkpoint
+INFO (CarpetX): ScheduleTraverseGH iteration 2 CCTK_ANALYSIS
+INFO (CarpetX): CallFunction iteration 2 CCTK_ANALYSIS: CanudaX_BSSNMoL::LeanBSSN_bssn_constraints
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HAM, CANUDAX_BSSNMOL::MOM
+INFO (CarpetX): CallFunction iteration 2 CCTK_ANALYSIS: TimerReport::zzz_TimerReport_Output
+INFO (CarpetX): OutputGH: iteration 2, time 0.007812, run time 40 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.0078125   Iterations per second: 0.153319   Simulation time per second: 0.000598901
+INFO (CarpetX): Grid cells: 1.73302e+07   Grid cell updates per second: 2.65704e+06
+INFO (CarpetX): ScheduleTraverseGH iteration 3 CCTK_PRESTEP
+INFO (CarpetX): ScheduleTraverseGH iteration 3 CCTK_EVOL
+INFO (CarpetX): CallFunction iteration 3 CCTK_EVOL: ODESolvers::ODESolvers_Solve
+INFO (CarpetX): CallFunction iteration 3 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 3 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 3 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 3 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 3 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 3 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 3 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 3 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 3 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 3 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 3 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 3 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 3 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 3 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 3 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 3 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 3 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 3 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 3 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 3 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 3 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 3 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 3 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 3 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 3 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 3 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 3 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 3 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 3 CCTK_POSTRESTRICT
+INFO (CarpetX): CallFunction iteration 3 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 3 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 3 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 3 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 3 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 3 CCTK_POSTSTEP
+INFO (CarpetX): CallFunction iteration 3 CCTK_POSTSTEP: ErrorEstimator::EstimateError
+INFO (CarpetX): CallFunction iteration 3 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 3 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 3 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 3 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 3 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 3 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 3 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 3 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 3 CCTK_CHECKPOINT
+INFO (CarpetX): CallFunction iteration 3 CCTK_CHECKPOINT: CarpetX::CarpetX_Checkpoint
+INFO (CarpetX): CallFunction iteration 3 CCTK_CHECKPOINT: TimerReport::zzz_TimerReport_Checkpoint
+INFO (CarpetX): ScheduleTraverseGH iteration 3 CCTK_ANALYSIS
+INFO (CarpetX): CallFunction iteration 3 CCTK_ANALYSIS: CanudaX_BSSNMoL::LeanBSSN_bssn_constraints
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HAM, CANUDAX_BSSNMOL::MOM
+INFO (CarpetX): CallFunction iteration 3 CCTK_ANALYSIS: TimerReport::zzz_TimerReport_Output
+INFO (CarpetX): OutputGH: iteration 3, time 0.011719, run time 47 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.0117188   Iterations per second: 0.151771   Simulation time per second: 0.000592856
+INFO (CarpetX): Grid cells: 1.73302e+07   Grid cell updates per second: 2.63022e+06
+INFO (CarpetX): ScheduleTraverseGH iteration 4 CCTK_PRESTEP
+INFO (CarpetX): ScheduleTraverseGH iteration 4 CCTK_EVOL
+INFO (CarpetX): CallFunction iteration 4 CCTK_EVOL: ODESolvers::ODESolvers_Solve
+INFO (CarpetX): CallFunction iteration 4 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 4 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 4 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 4 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 4 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 4 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 4 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 4 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 4 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 4 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 4 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 4 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 4 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 4 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 4 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 4 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 4 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 4 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 4 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 4 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 4 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 4 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 4 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 4 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 4 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 4 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 4 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 4 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 4 CCTK_POSTRESTRICT
+INFO (CarpetX): CallFunction iteration 4 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 4 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 4 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 4 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 4 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 4 CCTK_POSTSTEP
+INFO (CarpetX): CallFunction iteration 4 CCTK_POSTSTEP: ErrorEstimator::EstimateError
+INFO (CarpetX): CallFunction iteration 4 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 4 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 4 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 4 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 4 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 4 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 4 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 4 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 4 CCTK_CHECKPOINT
+INFO (CarpetX): CallFunction iteration 4 CCTK_CHECKPOINT: CarpetX::CarpetX_Checkpoint
+INFO (CarpetX): CallFunction iteration 4 CCTK_CHECKPOINT: TimerReport::zzz_TimerReport_Checkpoint
+INFO (CarpetX): ScheduleTraverseGH iteration 4 CCTK_ANALYSIS
+INFO (CarpetX): CallFunction iteration 4 CCTK_ANALYSIS: CanudaX_BSSNMoL::LeanBSSN_bssn_constraints
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HAM, CANUDAX_BSSNMOL::MOM
+INFO (CarpetX): CallFunction iteration 4 CCTK_ANALYSIS: TimerReport::zzz_TimerReport_Output
+INFO (CarpetX): OutputGH: iteration 4, time 0.015625, run time 53 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.015625   Iterations per second: 0.153008   Simulation time per second: 0.000597686
+INFO (CarpetX): Grid cells: 1.73302e+07   Grid cell updates per second: 2.65165e+06
+INFO (CarpetX): ScheduleTraverseGH iteration 5 CCTK_PRESTEP
+INFO (CarpetX): ScheduleTraverseGH iteration 5 CCTK_EVOL
+INFO (CarpetX): CallFunction iteration 5 CCTK_EVOL: ODESolvers::ODESolvers_Solve
+INFO (CarpetX): CallFunction iteration 5 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 5 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 5 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 5 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 5 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 5 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 5 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 5 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 5 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 5 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 5 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 5 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 5 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 5 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 5 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 5 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 5 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 5 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 5 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 5 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 5 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 5 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 5 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 5 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 5 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 5 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 5 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 5 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 5 CCTK_POSTRESTRICT
+INFO (CarpetX): CallFunction iteration 5 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 5 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 5 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 5 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 5 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 5 CCTK_POSTSTEP
+INFO (CarpetX): CallFunction iteration 5 CCTK_POSTSTEP: ErrorEstimator::EstimateError
+INFO (CarpetX): CallFunction iteration 5 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 5 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 5 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 5 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 5 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 5 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 5 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 5 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 5 CCTK_CHECKPOINT
+INFO (CarpetX): CallFunction iteration 5 CCTK_CHECKPOINT: CarpetX::CarpetX_Checkpoint
+INFO (CarpetX): CallFunction iteration 5 CCTK_CHECKPOINT: TimerReport::zzz_TimerReport_Checkpoint
+INFO (CarpetX): ScheduleTraverseGH iteration 5 CCTK_ANALYSIS
+INFO (CarpetX): CallFunction iteration 5 CCTK_ANALYSIS: CanudaX_BSSNMoL::LeanBSSN_bssn_constraints
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HAM, CANUDAX_BSSNMOL::MOM
+INFO (CarpetX): CallFunction iteration 5 CCTK_ANALYSIS: TimerReport::zzz_TimerReport_Output
+INFO (CarpetX): OutputGH: iteration 5, time 0.019531, run time 59 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.0195312   Iterations per second: 0.156217   Simulation time per second: 0.000610224
+INFO (CarpetX): Grid cells: 1.73302e+07   Grid cell updates per second: 2.70727e+06
+INFO (CarpetX): ScheduleTraverseGH iteration 6 CCTK_PRESTEP
+INFO (CarpetX): ScheduleTraverseGH iteration 6 CCTK_EVOL
+INFO (CarpetX): CallFunction iteration 6 CCTK_EVOL: ODESolvers::ODESolvers_Solve
+INFO (CarpetX): CallFunction iteration 6 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 6 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 6 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 6 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 6 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 6 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 6 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 6 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 6 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 6 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 6 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 6 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 6 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 6 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 6 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 6 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 6 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 6 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 6 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 6 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 6 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 6 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 6 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 6 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 6 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 6 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 6 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 6 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 6 CCTK_POSTRESTRICT
+INFO (CarpetX): CallFunction iteration 6 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 6 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 6 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 6 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 6 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 6 CCTK_POSTSTEP
+INFO (CarpetX): CallFunction iteration 6 CCTK_POSTSTEP: ErrorEstimator::EstimateError
+INFO (CarpetX): CallFunction iteration 6 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 6 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 6 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 6 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 6 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 6 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 6 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 6 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 6 CCTK_CHECKPOINT
+INFO (CarpetX): CallFunction iteration 6 CCTK_CHECKPOINT: CarpetX::CarpetX_Checkpoint
+INFO (CarpetX): CallFunction iteration 6 CCTK_CHECKPOINT: TimerReport::zzz_TimerReport_Checkpoint
+INFO (CarpetX): ScheduleTraverseGH iteration 6 CCTK_ANALYSIS
+INFO (CarpetX): CallFunction iteration 6 CCTK_ANALYSIS: CanudaX_BSSNMoL::LeanBSSN_bssn_constraints
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HAM, CANUDAX_BSSNMOL::MOM
+INFO (CarpetX): CallFunction iteration 6 CCTK_ANALYSIS: TimerReport::zzz_TimerReport_Output
+INFO (CarpetX): OutputGH: iteration 6, time 0.023438, run time 66 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.0234375   Iterations per second: 0.155017   Simulation time per second: 0.000605536
+INFO (CarpetX): Grid cells: 1.73302e+07   Grid cell updates per second: 2.68648e+06
+INFO (CarpetX): ScheduleTraverseGH iteration 7 CCTK_PRESTEP
+INFO (CarpetX): ScheduleTraverseGH iteration 7 CCTK_EVOL
+INFO (CarpetX): CallFunction iteration 7 CCTK_EVOL: ODESolvers::ODESolvers_Solve
+INFO (CarpetX): CallFunction iteration 7 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 7 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 7 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 7 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 7 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 7 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 7 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 7 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 7 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 7 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 7 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 7 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 7 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 7 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 7 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 7 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 7 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 7 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 7 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 7 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 7 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 7 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 7 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 7 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 7 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 7 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 7 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 7 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 7 CCTK_POSTRESTRICT
+INFO (CarpetX): CallFunction iteration 7 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 7 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 7 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 7 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 7 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 7 CCTK_POSTSTEP
+INFO (CarpetX): CallFunction iteration 7 CCTK_POSTSTEP: ErrorEstimator::EstimateError
+INFO (CarpetX): CallFunction iteration 7 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 7 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 7 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 7 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 7 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 7 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 7 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 7 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 7 CCTK_CHECKPOINT
+INFO (CarpetX): CallFunction iteration 7 CCTK_CHECKPOINT: CarpetX::CarpetX_Checkpoint
+INFO (CarpetX): CallFunction iteration 7 CCTK_CHECKPOINT: TimerReport::zzz_TimerReport_Checkpoint
+INFO (CarpetX): ScheduleTraverseGH iteration 7 CCTK_ANALYSIS
+INFO (CarpetX): CallFunction iteration 7 CCTK_ANALYSIS: CanudaX_BSSNMoL::LeanBSSN_bssn_constraints
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HAM, CANUDAX_BSSNMOL::MOM
+INFO (CarpetX): CallFunction iteration 7 CCTK_ANALYSIS: TimerReport::zzz_TimerReport_Output
+INFO (CarpetX): OutputGH: iteration 7, time 0.027344, run time 72 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.0273438   Iterations per second: 0.1527   Simulation time per second: 0.000596484
+INFO (CarpetX): Grid cells: 1.73302e+07   Grid cell updates per second: 2.64631e+06
+INFO (CarpetX): ScheduleTraverseGH iteration 8 CCTK_PRESTEP
+INFO (CarpetX): ScheduleTraverseGH iteration 8 CCTK_EVOL
+INFO (CarpetX): CallFunction iteration 8 CCTK_EVOL: ODESolvers::ODESolvers_Solve
+INFO (CarpetX): CallFunction iteration 8 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 8 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 8 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 8 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 8 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 8 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 8 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 8 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 8 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 8 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 8 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 8 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 8 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 8 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 8 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 8 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 8 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 8 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 8 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 8 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 8 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 8 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 8 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 8 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 8 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 8 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 8 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 8 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 8 CCTK_POSTRESTRICT
+INFO (CarpetX): CallFunction iteration 8 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 8 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 8 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 8 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 8 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 8 CCTK_POSTSTEP
+INFO (CarpetX): CallFunction iteration 8 CCTK_POSTSTEP: ErrorEstimator::EstimateError
+INFO (CarpetX): CallFunction iteration 8 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 8 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 8 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 8 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 8 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 8 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 8 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 8 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 8 CCTK_CHECKPOINT
+INFO (CarpetX): CallFunction iteration 8 CCTK_CHECKPOINT: CarpetX::CarpetX_Checkpoint
+INFO (CarpetX): CallFunction iteration 8 CCTK_CHECKPOINT: TimerReport::zzz_TimerReport_Checkpoint
+INFO (CarpetX): ScheduleTraverseGH iteration 8 CCTK_ANALYSIS
+INFO (CarpetX): CallFunction iteration 8 CCTK_ANALYSIS: CanudaX_BSSNMoL::LeanBSSN_bssn_constraints
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HAM, CANUDAX_BSSNMOL::MOM
+INFO (CarpetX): CallFunction iteration 8 CCTK_ANALYSIS: TimerReport::zzz_TimerReport_Output
+INFO (CarpetX): OutputGH: iteration 8, time 0.031250, run time 79 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.03125   Iterations per second: 0.161203   Simulation time per second: 0.000629699
+INFO (CarpetX): Grid cells: 1.73302e+07   Grid cell updates per second: 2.79368e+06
+INFO (CarpetX): ScheduleTraverseGH iteration 9 CCTK_PRESTEP
+INFO (CarpetX): ScheduleTraverseGH iteration 9 CCTK_EVOL
+INFO (CarpetX): CallFunction iteration 9 CCTK_EVOL: ODESolvers::ODESolvers_Solve
+INFO (CarpetX): CallFunction iteration 9 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 9 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 9 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 9 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 9 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 9 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 9 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 9 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 9 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 9 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 9 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 9 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 9 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 9 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 9 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 9 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 9 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 9 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 9 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 9 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 9 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 9 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 9 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 9 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 9 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 9 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 9 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 9 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 9 CCTK_POSTRESTRICT
+INFO (CarpetX): CallFunction iteration 9 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 9 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 9 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 9 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 9 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 9 CCTK_POSTSTEP
+INFO (CarpetX): CallFunction iteration 9 CCTK_POSTSTEP: ErrorEstimator::EstimateError
+INFO (CarpetX): CallFunction iteration 9 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 9 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 9 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 9 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 9 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 9 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 9 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 9 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 9 CCTK_CHECKPOINT
+INFO (CarpetX): CallFunction iteration 9 CCTK_CHECKPOINT: CarpetX::CarpetX_Checkpoint
+INFO (CarpetX): CallFunction iteration 9 CCTK_CHECKPOINT: TimerReport::zzz_TimerReport_Checkpoint
+INFO (CarpetX): ScheduleTraverseGH iteration 9 CCTK_ANALYSIS
+INFO (CarpetX): CallFunction iteration 9 CCTK_ANALYSIS: CanudaX_BSSNMoL::LeanBSSN_bssn_constraints
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HAM, CANUDAX_BSSNMOL::MOM
+INFO (CarpetX): CallFunction iteration 9 CCTK_ANALYSIS: TimerReport::zzz_TimerReport_Output
+INFO (CarpetX): OutputGH: iteration 9, time 0.035156, run time 85 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.0351562   Iterations per second: 0.150432   Simulation time per second: 0.000587625
+INFO (CarpetX): Grid cells: 1.73302e+07   Grid cell updates per second: 2.60701e+06
+INFO (CarpetX): ScheduleTraverseGH iteration 10 CCTK_PRESTEP
+INFO (CarpetX): ScheduleTraverseGH iteration 10 CCTK_EVOL
+INFO (CarpetX): CallFunction iteration 10 CCTK_EVOL: ODESolvers::ODESolvers_Solve
+INFO (CarpetX): CallFunction iteration 10 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 10 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 10 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 10 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 10 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 10 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 10 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 10 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 10 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 10 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 10 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 10 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 10 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 10 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 10 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 10 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 10 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 10 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 10 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 10 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 10 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 10 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 10 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 10 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 10 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 10 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 10 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 10 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 10 CCTK_POSTRESTRICT
+INFO (CarpetX): CallFunction iteration 10 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 10 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 10 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 10 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 10 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 10 CCTK_POSTSTEP
+INFO (CarpetX): CallFunction iteration 10 CCTK_POSTSTEP: ErrorEstimator::EstimateError
+INFO (CarpetX): CallFunction iteration 10 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::CONF_FAC
+INFO (CarpetX): CallFunction iteration 10 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::HMETRIC
+INFO (CarpetX): CallFunction iteration 10 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::CanudaX_Sync
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::ALPHA, CANUDAX_BSSNMOL::BETA, CANUDAX_BSSNMOL::CONF_FAC, CANUDAX_BSSNMOL::HMETRIC, CANUDAX_BSSNMOL::TRK, CANUDAX_BSSNMOL::HCURV, CANUDAX_BSSNMOL::GAMMAT
+INFO (CarpetX): CallFunction iteration 10 CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+INFO (CarpetX): CallFunction iteration 10 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): CallFunction iteration 10 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+INFO (CarpetX): CallFunction iteration 10 CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+INFO (CarpetX): CallFunction iteration 10 TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+INFO (CarpetX): ScheduleTraverseGH iteration 10 CCTK_CHECKPOINT
+INFO (CarpetX): CallFunction iteration 10 CCTK_CHECKPOINT: CarpetX::CarpetX_Checkpoint
+INFO (CarpetX): CallFunction iteration 10 CCTK_CHECKPOINT: TimerReport::zzz_TimerReport_Checkpoint
+INFO (CarpetX): ScheduleTraverseGH iteration 10 CCTK_ANALYSIS
+INFO (CarpetX): CallFunction iteration 10 CCTK_ANALYSIS: CanudaX_BSSNMoL::LeanBSSN_bssn_constraints
+INFO (CarpetX): SyncGroups CANUDAX_BSSNMOL::HAM, CANUDAX_BSSNMOL::MOM
+INFO (CarpetX): CallFunction iteration 10 CCTK_ANALYSIS: TimerReport::zzz_TimerReport_Output
+INFO (CarpetX): OutputGH: iteration 10, time 0.039062, run time 92 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.0390625   Iterations per second: 0.156858   Simulation time per second: 0.000612725
+INFO (CarpetX): Grid cells: 1.73302e+07   Grid cell updates per second: 2.71837e+06
+INFO (CarpetX): Performance:
+INFO (CarpetX):   total evolution time:            70.0338 sec
+INFO (CarpetX):   total evolution compute time:    70.0337 sec
+INFO (CarpetX):   total evolution output time:     6.67572e-05 sec
+INFO (CarpetX):   total cells updated:             1.73302e+08
+INFO (CarpetX):   total iterations:                10
+INFO (CarpetX):   average cell updates per second: 2.47454e+06
+INFO (CarpetX): Shutting down...
+INFO (CarpetX): ScheduleTraverseGH iteration 10 CCTK_TERMINATE
+INFO (CarpetX): CallFunction iteration 10 CCTK_TERMINATE: CarpetX::CarpetX_CheckpointTerminate
+INFO (CarpetX): CallFunction iteration 10 CCTK_TERMINATE: TimerReport::zzz_TimerReport_Output
+INFO (TimerReport): Timer Report before terminating at iteration 10 time 0.0390625
+INFO (TimerReport): Top timers at iteration 10 time 0.0390625
+======================================================================
+    %    Time/s   Min/s   Max/s   Timer (gettimeofday)
+======================================================================
+100.0   70.0443 70.0436 70.0525   Evolve
+ 73.8   51.7256 51.5157 51.8857   [0050] ODESolvers: ODESolvers_Solve in CCTK_EVOL
+ 73.8   51.7256 51.5157 51.8857   CallFunction CCTK_EVOL: ODESolvers::ODESolvers_Solve
+ 69.6   48.7449 48.2602 49.5078   CallScheduleGroup
+ 63.4   44.3880 41.5718 47.1762   Sync
+ 32.0   22.3871 21.8448 22.9335   CallFunction CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+ 27.0   18.9157 18.9090 18.9254   Initialise
+ 22.4   15.6585 15.3017 16.0376   [0051] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in ODESolvers_RHS
+  7.1    4.9897  4.5085  5.4109   CallFunction CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+  6.1    4.2780  4.1372  4.3543   [0045] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in CCTK_POSTSTEP
+  5.2    3.6342  3.1862  4.0240   [0052] CanudaX_BSSNMoL: LeanBSSN_add_dissipation in ODESolvers_RHS
+  4.4    3.0601  1.6174  3.5737   InitialiseRegrid [refined]
+  3.8    2.6903  1.9528  3.1329   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+  3.7    2.5652  2.4405  2.7735   [0011] TwoPunctures: TwoPunctures in CCTK_INITIAL
+  3.7    2.5651  2.4405  2.7734   CallFunction TwoPunctures_Group: TwoPunctures::TwoPunctures
+  3.5    2.4514  2.1261  2.7252   [0027] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in CCTK_POSTINITIAL
+  2.9    1.9985  1.9492  2.1616   [0048] CanudaX_BSSNMoL: LeanBSSN_bssn_constraints in CCTK_ANALYSIS
+  2.9    1.9984  1.9490  2.1615   CallFunction CCTK_ANALYSIS: CanudaX_BSSNMoL::LeanBSSN_bssn_constraints
+  2.2    1.5705  1.1161  1.8455   [0056] CanudaX_BSSNMoL: LeanBSSN_bssn2adm in ODESolvers_PostStep
+  1.3    0.8799  0.7015  1.0272   CallFunction TmunuBase_SetTmunuVars: TmunuBase::TmunuBase_ZeroTmunu
+======================================================================
+INFO (CarpetX): ScheduleTraverseGH iteration 10 CCTK_SHUTDOWN
+INFO (CarpetX): CallFunction iteration 10 CCTK_SHUTDOWN: CarpetX::Driver_Shutdown
+INFO (CarpetX): Shutdown
+AMReX (23.05) finalized
+--------------------------------------------------------------------------------
+Done.

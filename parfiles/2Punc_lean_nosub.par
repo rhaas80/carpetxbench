@@ -1,0 +1,264 @@
+
+#------------------------------------------------------------------------------
+ActiveThorns = "
+  ADMBase
+  ADMCoupling
+  ADMMacros
+  AEILocalInterp
+  Boundary
+  Carpet
+  CarpetInterp
+  CarpetIOASCII
+  CarpetIOBasic
+  CarpetIOHDF5
+  CarpetIOScalar
+  CarpetLib
+  CarpetMask
+  CarpetReduce
+  CarpetRegrid2
+  CarpetSlab
+  CarpetTracker
+  CartGrid3D
+  CoordBase
+  CoordGauge
+  Dissipation
+  Fortran
+  GSL
+  HDF5
+  InitBase
+  IOUtil
+  LeanBSSNMoL
+  LocalInterp
+  LoopControl
+  MoL
+  NaNChecker
+  NewRad
+  PeriodicCarpet
+  ReflectionSymmetry
+  Slab
+  SpaceMask
+  SphericalSurface
+  StaticConformal
+  SymBase
+  SystemStatistics
+  TerminationTrigger
+  Time
+  TimerReport
+  TmunuBase
+  TwoPunctures
+"
+#------------------------------------------------------------------------------
+
+
+# Grid setup
+#------------------------------------------------------------------------------
+
+CartGrid3D::type                     = "coordbase"
+Carpet::domain_from_coordbase        = yes
+CoordBase::domainsize                = "minmax"
+
+# make sure all (xmax - xmin)/dx are integers!
+CoordBase::xmin                      = -64.0
+CoordBase::ymin                      = -64.0
+CoordBase::zmin                      = -64.0
+CoordBase::xmax                      = +64.0
+CoordBase::ymax                      = +64.0
+CoordBase::zmax                      = +64.0
+CoordBase::dx                        =   0.5
+CoordBase::dy                        =   0.5
+CoordBase::dz                        =   0.5
+
+driver::ghost_size                   = 3
+
+CoordBase::boundary_size_x_lower     = 3
+CoordBase::boundary_size_y_lower     = 3
+CoordBase::boundary_size_z_lower     = 3
+CoordBase::boundary_size_x_upper     = 3
+CoordBase::boundary_size_y_upper     = 3
+CoordBase::boundary_size_z_upper     = 3
+
+CoordBase::boundary_shiftout_x_lower = 0
+CoordBase::boundary_shiftout_y_lower = 0
+CoordBase::boundary_shiftout_z_lower = 0
+
+PeriodicCarpet::periodic_x           = "yes"
+PeriodicCarpet::periodic_y           = "yes"
+PeriodicCarpet::periodic_z           = "yes"
+
+ReflectionSymmetry::reflection_x     = no
+ReflectionSymmetry::reflection_y     = no
+ReflectionSymmetry::reflection_z     = no
+ReflectionSymmetry::avoid_origin_x   = yes
+ReflectionSymmetry::avoid_origin_y   = yes
+ReflectionSymmetry::avoid_origin_z   = yes
+
+
+# Mesh refinement
+#------------------------------------------------------------------------------
+
+Carpet::max_refinement_levels           = 6
+
+CarpetRegrid2::num_centres              = 1
+
+CarpetRegrid2::num_levels_1             = 6
+CarpetRegrid2::position_x_1             = 0
+CarpetRegrid2::radius_1[1]              = 16.0
+CarpetRegrid2::radius_1[2]              =  8.0
+CarpetRegrid2::radius_1[3]              =  4.0
+CarpetRegrid2::radius_1[4]              =  2.0
+CarpetRegrid2::radius_1[5]              =  1.0
+#CarpetRegrid2::movement_threshold_1     = 0.16
+
+Carpet::use_buffer_zones                = yes
+Carpet::prolongation_order_space        = 5
+Carpet::prolongation_order_time         = 2
+
+CarpetRegrid2::freeze_unaligned_levels  = yes
+CarpetRegrid2::regrid_every             = -1
+
+CarpetRegrid2::verbose                  = no
+
+Carpet::grid_structure_filename         = "carpet-grid-structure"
+Carpet::grid_coordinates_filename       = "carpet-grid-coordinates"
+
+Carpet::time_refinement_factors         = "[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]"
+#Time::dtfac                             = 0.25
+Time::timestep_method                   = "given"
+Time::timestep                          = 0.00390625
+
+
+# Initial Data
+#------------------------------------------------------------------------------
+
+ADMBase::initial_data                 = "twopunctures"
+ADMBase::initial_lapse                = "one"
+ADMBase::initial_shift                = "zero"
+ADMBase::initial_dtlapse              = "zero"
+ADMBase::initial_dtshift              = "zero"
+
+ADMBase::lapse_timelevels             = 3
+ADMBase::shift_timelevels             = 3
+ADMBase::metric_timelevels            = 3
+
+# TwoPunctures::target_M_plus           = 0.5
+# TwoPunctures::target_M_minus          = 0.5
+
+TwoPunctures::par_m_plus              = 1.0
+TwoPunctures::par_m_minus             = 0
+
+TwoPunctures::par_b                   = 1e-5
+TwoPunctures::center_offset[0]        = 0
+
+TwoPunctures::par_P_plus[0]           = 0.
+TwoPunctures::par_P_plus[1]           = 0.
+TwoPunctures::par_P_plus[2]           = 0.
+
+TwoPunctures::par_P_minus[0]          = 0.
+TwoPunctures::par_P_minus[1]          = 0.
+TwoPunctures::par_P_minus[2]          = 0.
+
+TwoPunctures::par_S_plus[0]           = 0.
+TwoPunctures::par_S_plus[1]           = 0.
+TwoPunctures::par_S_plus[2]           = 0.
+
+TwoPunctures::par_S_minus[0]          = 0.
+TwoPunctures::par_S_minus[1]          = 0.
+TwoPunctures::par_S_minus[2]          = 0.
+
+TwoPunctures::grid_setup_method         = "Taylor expansion"
+TwoPunctures::give_bare_mass            = no
+TwoPunctures::TP_epsilon                = 1e-6
+TwoPunctures::TP_Tiny                   = 1.0d-10 ###
+
+TwoPunctures::npoints_A                 = 24         ###
+TwoPunctures::npoints_B                 = 24         ###
+TwoPunctures::npoints_phi               = 8          ###
+TwoPunctures::Newton_maxit              = 12         ###
+TwoPunctures::Newton_tol                = 1.0e-10    ###
+
+TwoPunctures::keep_u_around             = no    ###
+TwoPunctures::verbose                   = no  ###
+
+InitBase::initial_data_setup_method   = "init_some_levels"
+Carpet::init_fill_timelevels          = yes
+Carpet::init_3_timelevels             = no
+
+
+# Evolution
+#------------------------------------------------------------------------------
+
+ADMBase::evolution_method               = "LeanBSSNMoL"
+ADMBase::lapse_evolution_method         = "LeanBSSNMoL"
+ADMBase::shift_evolution_method         = "LeanBSSNMoL"
+ADMBase::dtlapse_evolution_method       = "LeanBSSNMoL"
+ADMBase::dtshift_evolution_method       = "LeanBSSNMoL"
+
+LeanBSSNMoL::slicing_condition         = "1+log"
+LeanBSSNMoL::kappa_alpha               = 2.0
+
+LeanBSSNMoL::impose_conf_fac_floor_at_initial = yes
+LeanBSSNMoL::conf_fac_floor               = 1.0d-04
+LeanBSSNMoL::make_aa_tracefree            = yes
+LeanBSSNMoL::precollapsed_lapse           = yes
+LeanBSSNMoL::eta_beta                     = 1
+LeanBSSNMoL::beta_Gamma                   = 0.75
+LeanBSSNMoL::derivs_order                 = 4
+LeanBSSNMoL::use_advection_stencils       = yes
+LeanBSSNMoL::calculate_constraints        = yes
+LeanBSSNMoL::use_rad_bc                   = no
+
+# Spatial finite differencing
+#------------------------------------------------------------------------------
+
+LeanBSSNMoL::apply_KO_dissipation = "yes"
+
+LeanBSSNMoL::dissipation_order = 5
+
+LeanBSSNMoL::eps_lapse0    = 0.15
+LeanBSSNMoL::eps_shift0    = 0.15
+LeanBSSNMoL::eps_conf_fac0 = 0.15
+LeanBSSNMoL::eps_hmetric0  = 0.15
+LeanBSSNMoL::eps_gammat0   = 0.15
+LeanBSSNMoL::eps_tracek0   = 0.15
+LeanBSSNMoL::eps_hcurv0    = 0.15
+
+# Integration method
+#------------------------------------------------------------------------------
+
+MoL::ODE_Method                 = "RK4"
+MoL::MoL_Intermediate_Steps     = 4
+MoL::MoL_Num_Scratch_Levels     = 1
+
+Carpet::num_integrator_substeps = 4
+
+# Timers
+#-------------------------------------------------------------------------------
+
+Cactus::cctk_timer_output               = "full"
+TimerReport::out_every                  = 5120
+TimerReport::n_top_timers               = 40
+TimerReport::output_all_timers_together = yes
+TimerReport::output_all_timers_readable = yes
+TimerReport::output_schedule_timers     = no
+
+
+# I/O thorns
+#-------------------------------------------------------------------------------
+
+Cactus::cctk_run_title       = $parfile
+IO::out_dir                  = $parfile
+
+Carpet::verbose                    = no
+Carpet::veryverbose                = no
+Carpet::schedule_barriers          = no
+Carpet::storage_verbose            = no
+CarpetLib::output_bboxes           = no
+
+Cactus::cctk_full_warnings         = yes
+Cactus::highlight_warning_messages = no
+
+# Run termination
+#-------------------------------------------------------------------------------
+Cactus::terminate       = "iteration"
+Cactus::cctk_itlast     = 10
+

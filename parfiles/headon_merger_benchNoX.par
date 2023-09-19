@@ -1,3 +1,4 @@
+$itlast = 8 # 2048 (two coarse steps) takes too long
 
 #------------------------------------------------------------------------------
 ActiveThorns = "
@@ -223,7 +224,7 @@ MoL::MoL_Num_Scratch_Levels = 1
 CarpetIOASCII::out1d_vars = "
   ADMBase::alp
 "
-CarpetIOASCII::out1d_every = 2048
+CarpetIOASCII::out1d_every = $itlast
 
 IOBasic::outInfo_every      = 1
 IOBasic::outInfo_reductions = "norm2"
@@ -239,7 +240,7 @@ IO::out_every = 0
 IO::out_mode = "np"
 IO::out_proc_every = 1
 
-TimerReport::out_every = 2048
+TimerReport::out_every = $itlast
 TimerReport::out_filename = "TimerReport"
 TimerReport::output_schedule_timers = no
 TimerReport::n_top_timers = 40
@@ -251,7 +252,7 @@ TimerReport::n_top_timers = 40
 # Run termination
 #-------------------------------------------------------------------------------
 Cactus::terminate       = "iteration"
-Cactus::cctk_itlast = 2048
+Cactus::cctk_itlast = $itlast
 
 # Cactus::terminate       = "iteration"
 # Cactus::cctk_itlast     = 128

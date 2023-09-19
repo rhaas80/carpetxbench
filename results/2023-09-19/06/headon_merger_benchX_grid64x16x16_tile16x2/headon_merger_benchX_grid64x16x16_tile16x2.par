@@ -1,0 +1,248 @@
+$itlast = 1 # 2048 (two coarse steps) takes too long
+
+#------------------------------------------------------------------------------
+ActiveThorns = "
+  ADMBaseX
+  CanudaX_BSSNMoL
+  # CanudaX_ExactID
+  CarpetX
+  CoordinatesX
+  BoxInBox
+  ODESolvers
+  IOUtil
+  TimerReport
+  TmunuBaseX
+  TwoPunctures
+"
+#------------------------------------------------------------------------------
+
+
+# Grid setup
+#------------------------------------------------------------------------------
+Cactus::cctk_show_schedule = yes
+
+Cactus::presync_mode = "mixed-error"
+
+CarpetX::poison_undefined_values = no
+# CarpetX::kernel_launch_method = "default"
+CarpetX::verbose        = no
+
+CarpetX::xmin = -256.0
+CarpetX::ymin = -256.0
+CarpetX::zmin = -256.0
+
+CarpetX::xmax = +256.0
+CarpetX::ymax = +256.0
+CarpetX::zmax = +256.0
+
+CarpetX::ncells_x = 64
+CarpetX::ncells_y = 64
+CarpetX::ncells_z = 64
+
+CarpetX::max_tile_size_x = 10000000
+CarpetX::max_tile_size_y = 16
+CarpetX::max_tile_size_z = 2
+
+CarpetX::max_grid_size_x = 64
+CarpetX::max_grid_size_y = 16
+CarpetX::max_grid_size_z = 16
+
+CarpetX::periodic_x = no
+CarpetX::periodic_y = no
+CarpetX::periodic_z = no
+
+CarpetX::boundary_x = "neumann"
+CarpetX::boundary_y = "neumann"
+CarpetX::boundary_z = "neumann"
+
+CarpetX::boundary_upper_x = "neumann"
+CarpetX::boundary_upper_y = "neumann"
+CarpetX::boundary_upper_z = "neumann"
+
+CarpetX::max_num_levels         = 11
+CarpetX::regrid_every           = 64
+CarpetX::regrid_error_threshold = 1./128.
+CarpetX::ghost_size     = 3
+
+CarpetX::prolongation_type  = "ddf"
+CarpetX::prolongation_order = 5
+# CarpetX::restrict_during_sync = no
+
+CarpetX::dtfac = 0.25
+
+BoxInBox::position_x_1 =  2.4
+BoxInBox::num_levels_1 = 9
+BoxInBox::radius_1 = [-1., -1, -1, -1, -1, 8., 4., 2., 1.]
+
+BoxInBox::position_x_2 = -9.6
+BoxInBox::num_levels_2 = 11
+BoxInBox::radius_2 = [-1., -1, -1, -1, -1, 8., 4., 2., 1., 0.5, 0.25]
+
+BoxInBox::num_levels_3 = 5
+BoxInBox::radius_3 = [-1., 128, 64, 32, 16]
+
+# Initial Data
+#------------------------------------------------------------------------------
+
+# ADMBaseX::initial_data = "Cartesian Minkowski"
+# ADMBaseX::initial_lapse = one
+# ADMBaseX::initial_shift = zero
+# ADMBaseX::initial_dtlapse = zero
+# ADMBaseX::initial_dtshift = zero
+#
+# CanudaX_ExactID::KQI_m_plus      = 1.0
+# CanudaX_ExactID::KQI_spin_plus   = 0.00
+# CanudaX_ExactID::KQI_pos_plus[1] = 1e-4
+# CanudaX_ExactID::eps_r           = 1e-4
+
+ADMBaseX::initial_data = "Cartesian Minkowski"
+ADMBaseX::initial_lapse = one
+ADMBaseX::initial_shift = zero
+ADMBaseX::initial_dtlapse = zero
+ADMBaseX::initial_dtshift = zero
+
+TwoPunctures::initial_lapse_psi_exponent = -2.0
+
+# TwoPunctures::target_M_plus             = 0.5
+# TwoPunctures::target_M_minus            = 0.5
+
+# Initial guesses for iterative solve
+TwoPunctures::par_m_plus                = 0.8
+TwoPunctures::par_m_minus               = 0.2
+
+TwoPunctures::par_b                     = 6.0
+TwoPunctures::center_offset[0]          = -3.6
+
+TwoPunctures::par_P_plus[0]             = 0.0
+TwoPunctures::par_P_plus[1]             = 0.0
+TwoPunctures::par_P_plus[2]             = 0.0
+
+TwoPunctures::par_P_minus[0]            = 0.0
+TwoPunctures::par_P_minus[1]            = 0.0
+TwoPunctures::par_P_minus[2]            = 0.0
+
+TwoPunctures::par_S_plus[0]             = 0.0
+TwoPunctures::par_S_plus[1]             = 0.0
+TwoPunctures::par_S_plus[2]             = 0.0
+
+TwoPunctures::par_S_minus[0]            = 0.0
+TwoPunctures::par_S_minus[1]            = 0.0
+TwoPunctures::par_S_minus[2]            = 0.0
+
+TwoPunctures::grid_setup_method         = "Taylor expansion"
+TwoPunctures::give_bare_mass            = yes
+TwoPunctures::TP_epsilon                = 1e-6
+TwoPunctures::TP_Tiny                   = 1.0d-10
+
+TwoPunctures::npoints_A                 = 40
+TwoPunctures::npoints_B                 = 40
+TwoPunctures::npoints_phi               = 36
+TwoPunctures::Newton_maxit              = 12
+TwoPunctures::Newton_tol                = 1.0e-10
+
+TwoPunctures::keep_u_around             = no
+TwoPunctures::verbose                   = no
+
+# Evolution
+#------------------------------------------------------------------------------
+
+CanudaX_BSSNMoL::calculate_constraints              = yes
+CanudaX_BSSNMoL::slicing_condition                  = "1+log" #geodesic to freeze lapse
+CanudaX_BSSNMoL::kappa_alpha                        = 2.0
+CanudaX_BSSNMoL::impose_conf_fac_floor_at_initial   = yes
+CanudaX_BSSNMoL::conf_fac_floor                     = 1.0d-04
+CanudaX_BSSNMoL::precollapsed_lapse                 = no
+CanudaX_BSSNMoL::zeta_alpha                         = 1    #set to 0 to freeze lapse
+CanudaX_BSSNMoL::zeta_beta                          = 1    #set to 0 to freeze shift
+CanudaX_BSSNMoL::eta_beta                           = 1    #set to 0 to freeze shift
+CanudaX_BSSNMoL::beta_Gamma                         = 0.75 #set to 0 to freeze shift
+CanudaX_BSSNMoL::chi_gamma                          = 0.667
+CanudaX_BSSNMoL::beta_Alp                           = 1
+CanudaX_BSSNMoL::eta_transition                     = no
+CanudaX_BSSNMoL::moving_eta_transition              = no
+CanudaX_BSSNMoL::eta_beta_dynamic                   = no
+CanudaX_BSSNMoL::eps_r                              = 1e-5
+
+CanudaX_BSSNMoL::reset_dethh                        = yes
+CanudaX_BSSNMoL::make_aa_tracefree                  = yes
+CanudaX_BSSNMoL::stress_energy_state                = no
+
+CanudaX_BSSNMoL::derivs_order                       = 4
+CanudaX_BSSNMoL::use_advection_stencils             = yes
+CanudaX_BSSNMoL::add_KO_dissipation                 = yes
+CanudaX_BSSNMoL::diss_eps                           = 0.15
+CanudaX_BSSNMoL::diss_order                         = 5
+
+CanudaX_BSSNMoL::boundary_conditions                = "none"
+
+# Evolution
+#------------------------------------------------------------------------------
+
+ODESolvers::method = "RK4"
+
+# debug I/O
+#-------------------------------------------------------------------------------
+CarpetX::out_tsv_vars = "
+  CanudaX_BSSNMoL::alpha
+  # CanudaX_BSSNMoL::beta
+  #CanudaX_BSSNMoL::conf_fac
+  # CanudaX_BSSNMoL::hmetric
+  #CanudaX_BSSNMoL::trk
+  # CanudaX_BSSNMoL::rhs_tracek
+  # CanudaX_BSSNMoL::hcurv
+  # CanudaX_BSSNMoL::gammat
+  #CanudaX_BSSNMoL::ham
+  # CanudaX_BSSNMoL::mom
+"
+CarpetX::out_tsv_every = $itlast
+
+CarpetX::out_silo_vars = "
+  # CanudaX_BSSNMoL::alpha
+  # ADMBaseX::alp
+  # CanudaX_BSSNMoL::beta
+  CanudaX_BSSNMoL::conf_fac
+  # CanudaX_BSSNMoL::hmetric
+  CanudaX_BSSNMoL::trk
+  # CanudaX_BSSNMoL::rhs_tracek
+  # CanudaX_BSSNMoL::hcurv
+  # CanudaX_BSSNMoL::gammat
+  # CanudaX_BSSNMoL::ham
+  # CanudaX_BSSNMoL::mom
+"
+CarpetX::out_silo_every = 0
+
+#CarpetX::out_norm_omit_unstable = false
+CarpetX::out_norm_vars = "
+  CanudaX_BSSNMoL::alpha
+  # ADMBaseX::alp
+  # CanudaX_BSSNMoL::beta
+  CanudaX_BSSNMoL::conf_fac
+  # CanudaX_BSSNMoL::hmetric
+  CanudaX_BSSNMoL::trk
+  # CanudaX_BSSNMoL::rhs_tracek
+  # CanudaX_BSSNMoL::hcurv
+  # CanudaX_BSSNMoL::gammat
+  CanudaX_BSSNMoL::ham
+  # CanudaX_BSSNMoL::mom
+"
+IO::out_dir = $parfile
+IO::out_every = 0
+IO::out_mode = "np"
+IO::out_proc_every = 1
+
+TimerReport::out_every = $itlast
+TimerReport::out_filename = "TimerReport"
+TimerReport::output_schedule_timers = no
+TimerReport::n_top_timers = 40
+
+# Checkpointing
+#-------------------------------------------------------------------------------
+# IOUtil::checkpoint_every = -1
+
+# Run termination
+#-------------------------------------------------------------------------------
+Cactus::terminate       = "iteration"
+Cactus::cctk_itlast = $itlast
+
+# Cactus::terminate       = "iteration"
+# Cactus::cctk_itlast     = 128

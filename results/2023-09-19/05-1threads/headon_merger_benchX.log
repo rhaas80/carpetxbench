@@ -1,0 +1,918 @@
+--------------------------------------------------------------------------------
+
+       10                                  
+  1   0101       ************************  
+  01  1010 10      The Cactus Code V4.14.0    
+ 1010 1101 011      www.cactuscode.org     
+  1001 100101    ************************  
+    00010101                               
+     100011     (c) Copyright The Authors  
+      0100      GNU Licensed. No Warranty  
+      0101                                 
+--------------------------------------------------------------------------------
+
+Cactus version:    4.14.0
+Compile date:      Sep 19 2023 (10:26:47)
+Run date:          Sep 19 2023 (12:38:13-0500)
+Run host:          ekohaes8 (pid=3859845)
+Working directory: /data/rhaas/simulations/05-1threads
+Executable:        /home/rhaas/postdoc/gr//cactus/CanudaX/exe/cactus_sim
+Parameter file:    /home/rhaas/postdoc/gr//cactus/carpetxbench/parfiles/headon_merger_benchX.par
+--------------------------------------------------------------------------------
+
+Activating thorn Cactus...Success -> active implementation Cactus
+Activation requested for 
+--->ADMBaseX CanudaX_BSSNMoL CarpetX CoordinatesX BoxInBox ODESolvers IOUtil TimerReport TmunuBaseX TwoPunctures<---
+Thorn ADMBaseX requests automatic activation of Loop
+Thorn CarpetX requests automatic activation of AMReX
+Thorn CarpetX requests automatic activation of MPI
+Thorn CarpetX requests automatic activation of yaml_cpp
+Thorn CarpetX requests automatic activation of zlib
+Thorn CarpetX requests automatic activation of Arith
+Thorn CarpetX requests automatic activation of ADIOS2
+Thorn CarpetX requests automatic activation of CUDA
+Thorn CarpetX requests automatic activation of openPMD
+Thorn CarpetX requests automatic activation of Silo
+Thorn TwoPunctures requests automatic activation of GSL
+Thorn ADIOS2 requests automatic activation of CMake
+Thorn Arith requests automatic activation of NSIMD
+Thorn MPI requests automatic activation of hwloc
+Thorn openPMD requests automatic activation of HDF5
+Activating thorn ADIOS2...Success -> active implementation ADIOS2
+Activating thorn ADMBaseX...Success -> active implementation ADMBaseX
+Activating thorn AMReX...Success -> active implementation AMReX
+Activating thorn Arith...Success -> active implementation Arith
+Activating thorn BoxInBox...Success -> active implementation BoxInBox
+Activating thorn CanudaX_BSSNMoL...Success -> active implementation CanudaX_BSSNMoL
+Activating thorn CarpetX...Success -> active implementation CarpetX
+Activating thorn CMake...Success -> active implementation CMake
+Activating thorn CoordinatesX...Success -> active implementation CoordinatesX
+Activating thorn CUDA...Success -> active implementation CUDA
+Activating thorn GSL...Success -> active implementation GSL
+Activating thorn HDF5...Success -> active implementation HDF5
+Activating thorn hwloc...Success -> active implementation hwloc
+Activating thorn IOUtil...Success -> active implementation IO
+Activating thorn Loop...Success -> active implementation Loop
+Activating thorn MPI...Success -> active implementation MPI
+Activating thorn NSIMD...Success -> active implementation NSIMD
+Activating thorn ODESolvers...Success -> active implementation ODESolvers
+Activating thorn openPMD...Success -> active implementation openPMD
+Activating thorn Silo...Success -> active implementation Silo
+Activating thorn TimerReport...Success -> active implementation timerreport
+Activating thorn TmunuBaseX...Success -> active implementation TmunuBaseX
+Activating thorn TwoPunctures...Success -> active implementation TwoPunctures
+Activating thorn yaml_cpp...Success -> active implementation yaml_cpp
+Activating thorn zlib...Success -> active implementation zlib
+--------------------------------------------------------------------------------
+  if (recover initial data)
+    Recover parameters
+  endif
+
+  Startup routines
+    [CCTK_STARTUP]
+      CarpetX::Driver_Startup: Start up the driver
+      IOUtil::IOUtil_Startup: Startup routine
+      GROUP hwloc_startup: hwloc startup group
+        hwloc::hwloc_version: Output hwloc version
+
+  Startup routines which need an existing grid hierarchy
+    [CCTK_WRAGH]
+      Arith::Test_smallvector: [meta] Test small vectors
+      Arith::Test_spvect: [meta] Test sparse vectors
+  Parameter checking routines
+    [CCTK_PARAMCHECK]
+      CanudaX_BSSNMoL::Lean_ParamCheck: Check Lean parameters for consistency
+      TwoPunctures::TwoPunctures_ParamCheck: Check parameters and thorn needs
+
+  Initialisation
+    if (NOT (recover initial data AND recovery_mode is 'strict'))
+      [CCTK_PREREGRIDINITIAL]
+      Set up grid hierarchy
+      [CCTK_POSTREGRIDINITIAL]
+      [CCTK_BASEGRID]
+        CanudaX_BSSNMoL::LeanBSSN_zero: Set everywhere grid functions to zero to prevent spurious nans
+        CanudaX_BSSNMoL::LeanBSSN_zero_constr: Set everywhere constraints grid functions to zero to prevent spurious nans
+        CarpetX::CarpetX_InitError: Initialize regridding error to zero
+        CoordinatesX::CoordinatesX_Setup: Set coordinate grid functions
+        GROUP ODESolvers_BaseGrid: Set up constants (e.g. coordinates) everywhere on the grid
+      [CCTK_INITIAL]
+        GROUP ADMBaseX_InitialData: Schedule group for calculating ADM initial data
+          GROUP TwoPunctures_Group: TwoPunctures initial data group
+            TwoPunctures::TwoPunctures: Create puncture black hole initial data
+            TwoPunctures::TwoPunctures_Metadata: [global] Output TwoPunctures metadata
+        GROUP ADMBaseX_InitialGauge: Schedule group for the ADM initial gauge condition
+          ADMBaseX::ADMBaseX_initial_dtlapse: Set dtlapse to zero
+          ADMBaseX::ADMBaseX_initial_shift: Set shift to zero
+          ADMBaseX::ADMBaseX_initial_dtshift: Set dtshift to zero
+        GROUP ADMBaseX_PostInitial: Schedule group for modifying the ADM initial data, such as e.g. adding noise
+        BoxInBox::BoxInBox_Init: [global] Initialize
+        GROUP CanudaX_BSSNMoL_InitialGroup: CanudaX : initial bin
+          CanudaX_BSSNMoL::LeanBSSN_slicing_condition: Enforces choice of slicing conditions
+          CanudaX_BSSNMoL::LeanBSSN_adm2bssn: [local] Convert initial data into BSSN variables
+          CanudaX_BSSNMoL::LeanBSSN_gammat: [local] Set Gammat initial data
+          CanudaX_BSSNMoL::CanudaX_Sync: [global] Sync BSSN variables
+        GROUP ODESolvers_Initial: Set up initial conditions on interior of state vector
+        GROUP TmunuBaseX_SetTmunuVars: Schedule group for setting T_munu
+          TmunuBaseX::TmunuBaseX_ZeroTmunu: Set T_munu to zero
+          GROUP TmunuBaseX_AddToTmunu: Add to T_munu here
+      [CCTK_POSTINITIAL]
+        BoxInBox::EstimateError: Estimate error
+        GROUP ODESolvers_PostStep: Apply boundary conditions to state vector, and project if necessary
+          GROUP ADMBaseX_SetADMVars: Set ADM variables in this group
+          GROUP ADMBaseX_SetADMRHS: Set ADM RHS variables in this group
+          GROUP CanudaX_BSSNMoL_PostStepGroup: CanudaX : post-step operations
+            CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor: Make sure conformal factor does not drop below specified value
+            CanudaX_BSSNMoL::LeanBSSN_reset_detmetric: reset dethh = 1
+            CanudaX_BSSNMoL::LeanBSSN_remove_trA: Remove trace of A
+            CanudaX_BSSNMoL::CanudaX_Sync: [global] Sync state vector
+            CanudaX_BSSNMoL::LeanBSSN_bssn2adm: [local] Convert variables back to the ADM ones
+          GROUP TmunuBaseX_SetTmunuVars: Schedule group for setting T_munu
+            TmunuBaseX::TmunuBaseX_ZeroTmunu: Set T_munu to zero
+            GROUP TmunuBaseX_AddToTmunu: Add to T_munu here
+        GROUP ODESolvers_RHS: Evaluate RHS for of state vector everywhere on the grid
+          GROUP CanudaX_BSSNMoL_RHSGroup: CanudaX : calculate BSSN RHS
+            CanudaX_BSSNMoL::LeanBSSN_CalcRHS: MoL RHS calculation
+            CanudaX_BSSNMoL::LeanBSSN_add_dissipation: Add KO dissipation
+            CanudaX_BSSNMoL::LeanBSSN_apply_boundary_conditions: Apply radiative boundary conditions 
+        GROUP ODESolvers_EstimateError: Estimate discretization error (for regridding)
+      Initialise finer grids recursively
+      Restrict from finer grids
+      [CCTK_POSTRESTRICTINITIAL]
+      [CCTK_POSTPOSTINITIAL]
+      [CCTK_POSTSTEP]
+        BoxInBox::EstimateError: Estimate error
+        GROUP ODESolvers_PostStep: Apply boundary conditions to state vector, and project if necessary
+          GROUP ADMBaseX_SetADMVars: Set ADM variables in this group
+          GROUP ADMBaseX_SetADMRHS: Set ADM RHS variables in this group
+          GROUP CanudaX_BSSNMoL_PostStepGroup: CanudaX : post-step operations
+            CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor: Make sure conformal factor does not drop below specified value
+            CanudaX_BSSNMoL::LeanBSSN_reset_detmetric: reset dethh = 1
+            CanudaX_BSSNMoL::LeanBSSN_remove_trA: Remove trace of A
+            CanudaX_BSSNMoL::CanudaX_Sync: [global] Sync state vector
+            CanudaX_BSSNMoL::LeanBSSN_bssn2adm: [local] Convert variables back to the ADM ones
+          GROUP TmunuBaseX_SetTmunuVars: Schedule group for setting T_munu
+            TmunuBaseX::TmunuBaseX_ZeroTmunu: Set T_munu to zero
+            GROUP TmunuBaseX_AddToTmunu: Add to T_munu here
+        GROUP ODESolvers_RHS: Evaluate the RHS for of state vector everywhere on the grid
+          GROUP CanudaX_BSSNMoL_RHSGroup: CanudaX : calculate BSSN RHS
+            CanudaX_BSSNMoL::LeanBSSN_CalcRHS: MoL RHS calculation
+            CanudaX_BSSNMoL::LeanBSSN_add_dissipation: Add KO dissipation
+            CanudaX_BSSNMoL::LeanBSSN_apply_boundary_conditions: Apply radiative boundary conditions 
+        GROUP ODESolvers_EstimateError: Estimate discretization error (for regridding)
+    endif
+    if (recover initial data)
+      [CCTK_BASEGRID]
+        CanudaX_BSSNMoL::LeanBSSN_zero: Set everywhere grid functions to zero to prevent spurious nans
+        CanudaX_BSSNMoL::LeanBSSN_zero_constr: Set everywhere constraints grid functions to zero to prevent spurious nans
+        CarpetX::CarpetX_InitError: Initialize regridding error to zero
+        CoordinatesX::CoordinatesX_Setup: Set coordinate grid functions
+        GROUP ODESolvers_BaseGrid: Set up constants (e.g. coordinates) everywhere on the grid
+      [CCTK_RECOVER_VARIABLES]
+      [CCTK_POST_RECOVER_VARIABLES]
+    endif
+    if (checkpoint initial data)
+      [CCTK_CPINITIAL]
+        CarpetX::CarpetX_CheckpointInitial: [meta] Checkpoint initial conditions
+    endif
+    if (analysis)
+      [CCTK_ANALYSIS]
+        CanudaX_BSSNMoL::LeanBSSN_bssn_constraints: Compute constraints
+        GROUP ODESolvers_Analysis: Calculate analysis quantities everywhere
+        TimerReport::zzz_TimerReport_Output: [global] Print the timer report
+  endif
+  Output grid variables
+
+  do loop over timesteps
+    [CCTK_PREREGRID]
+    Change grid hierarchy
+    [CCTK_POSTREGRID]
+      GROUP ODESolvers_PostStep: Apply boundary conditions to state vector, and project if necessary
+        GROUP ADMBaseX_SetADMVars: Set ADM variables in this group
+        GROUP ADMBaseX_SetADMRHS: Set ADM RHS variables in this group
+        GROUP CanudaX_BSSNMoL_PostStepGroup: CanudaX : post-step operations
+          CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor: Make sure conformal factor does not drop below specified value
+          CanudaX_BSSNMoL::LeanBSSN_reset_detmetric: reset dethh = 1
+          CanudaX_BSSNMoL::LeanBSSN_remove_trA: Remove trace of A
+          CanudaX_BSSNMoL::CanudaX_Sync: [global] Sync state vector
+          CanudaX_BSSNMoL::LeanBSSN_bssn2adm: [local] Convert variables back to the ADM ones
+        GROUP TmunuBaseX_SetTmunuVars: Schedule group for setting T_munu
+          TmunuBaseX::TmunuBaseX_ZeroTmunu: Set T_munu to zero
+          GROUP TmunuBaseX_AddToTmunu: Add to T_munu here
+    Rotate timelevels
+    iteration = iteration+1
+    t = t+dt
+    [CCTK_PRESTEP]
+    [CCTK_EVOL]
+      ODESolvers::ODESolvers_Solve: [level] Solve ODEs
+    Evolve finer grids recursively
+    Restrict from finer grids
+    [CCTK_POSTRESTRICT]
+      GROUP ODESolvers_PostStep: Apply boundary conditions to state vector, and project if necessary
+        GROUP ADMBaseX_SetADMVars: Set ADM variables in this group
+        GROUP ADMBaseX_SetADMRHS: Set ADM RHS variables in this group
+        GROUP CanudaX_BSSNMoL_PostStepGroup: CanudaX : post-step operations
+          CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor: Make sure conformal factor does not drop below specified value
+          CanudaX_BSSNMoL::LeanBSSN_reset_detmetric: reset dethh = 1
+          CanudaX_BSSNMoL::LeanBSSN_remove_trA: Remove trace of A
+          CanudaX_BSSNMoL::CanudaX_Sync: [global] Sync state vector
+          CanudaX_BSSNMoL::LeanBSSN_bssn2adm: [local] Convert variables back to the ADM ones
+        GROUP TmunuBaseX_SetTmunuVars: Schedule group for setting T_munu
+          TmunuBaseX::TmunuBaseX_ZeroTmunu: Set T_munu to zero
+          GROUP TmunuBaseX_AddToTmunu: Add to T_munu here
+    [CCTK_POSTSTEP]
+      BoxInBox::EstimateError: Estimate error
+      GROUP ODESolvers_PostStep: Apply boundary conditions to state vector, and project if necessary
+        GROUP ADMBaseX_SetADMVars: Set ADM variables in this group
+        GROUP ADMBaseX_SetADMRHS: Set ADM RHS variables in this group
+        GROUP CanudaX_BSSNMoL_PostStepGroup: CanudaX : post-step operations
+          CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor: Make sure conformal factor does not drop below specified value
+          CanudaX_BSSNMoL::LeanBSSN_reset_detmetric: reset dethh = 1
+          CanudaX_BSSNMoL::LeanBSSN_remove_trA: Remove trace of A
+          CanudaX_BSSNMoL::CanudaX_Sync: [global] Sync state vector
+          CanudaX_BSSNMoL::LeanBSSN_bssn2adm: [local] Convert variables back to the ADM ones
+        GROUP TmunuBaseX_SetTmunuVars: Schedule group for setting T_munu
+          TmunuBaseX::TmunuBaseX_ZeroTmunu: Set T_munu to zero
+          GROUP TmunuBaseX_AddToTmunu: Add to T_munu here
+      GROUP ODESolvers_RHS: Evaluate the RHS for of state vector everywhere on the grid
+        GROUP CanudaX_BSSNMoL_RHSGroup: CanudaX : calculate BSSN RHS
+          CanudaX_BSSNMoL::LeanBSSN_CalcRHS: MoL RHS calculation
+          CanudaX_BSSNMoL::LeanBSSN_add_dissipation: Add KO dissipation
+          CanudaX_BSSNMoL::LeanBSSN_apply_boundary_conditions: Apply radiative boundary conditions 
+      GROUP ODESolvers_EstimateError: Estimate discretization error (for regridding)
+    if (checkpoint)
+      [CCTK_CHECKPOINT]
+      CarpetX::CarpetX_Checkpoint: [meta] Checkpoint
+      TimerReport::zzz_TimerReport_Checkpoint: [global] Print the timer report
+    endif
+    if (analysis)
+      [CCTK_ANALYSIS]
+      CanudaX_BSSNMoL::LeanBSSN_bssn_constraints: Compute constraints
+      GROUP ODESolvers_Analysis: Calculate analysis quantities everywhere
+      TimerReport::zzz_TimerReport_Output: [global] Print the timer report
+    endif
+    Output grid variables
+    enddo
+
+  Termination routines
+    [CCTK_TERMINATE]
+      CarpetX::CarpetX_CheckpointTerminate: [meta] Checkpoint before terminating
+      TimerReport::zzz_TimerReport_Output: [global] Print the timer report
+
+  Shutdown routines
+    [CCTK_SHUTDOWN]
+      CarpetX::Driver_Shutdown: [meta] Shut down the driver
+
+  Routines run after changing the grid hierarchy:
+    [CCTK_POSTREGRID]
+      GROUP ODESolvers_PostStep: Apply boundary conditions to state vector, and project if necessary
+        GROUP ADMBaseX_SetADMVars: Set ADM variables in this group
+        GROUP ADMBaseX_SetADMRHS: Set ADM RHS variables in this group
+        GROUP CanudaX_BSSNMoL_PostStepGroup: CanudaX : post-step operations
+          CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor: Make sure conformal factor does not drop below specified value
+          CanudaX_BSSNMoL::LeanBSSN_reset_detmetric: reset dethh = 1
+          CanudaX_BSSNMoL::LeanBSSN_remove_trA: Remove trace of A
+          CanudaX_BSSNMoL::CanudaX_Sync: [global] Sync state vector
+          CanudaX_BSSNMoL::LeanBSSN_bssn2adm: [local] Convert variables back to the ADM ones
+        GROUP TmunuBaseX_SetTmunuVars: Schedule group for setting T_munu
+          TmunuBaseX::TmunuBaseX_ZeroTmunu: Set T_munu to zero
+          GROUP TmunuBaseX_AddToTmunu: Add to T_munu here
+--------------------------------------------------------------------------------
+INFO (hwloc): library version 2.9.2, API version 0x20800
+--------------------------------------------------------------------------------
+
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [39m  
+  [34m──██──[32m██████[34m──██──[34m──██──[32m██████[34m──██──[34m──██──[32m██████[34m──██──[39m  
+  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [31m██████[31m██████[31m██████[34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m──██──[34m──██──[34m──██──[31m██████[31m██████[31m██████[34m──██──[34m──██──[34m──██──[39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [31m██████[31m██████[31m██████[34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m  ▕▏  [32m██████[34m  ▕▏  [31m██████[31m██████[31m██████[34m  ▕▏  [32m██████[34m  ▕▏  [39m  
+  [34m──██──[32m██████[34m──██──[31m██████[31m██████[31m██████[34m──██──[32m██████[34m──██──[39m  
+  [34m  ▕▏  [32m██████[34m  ▕▏  [31m██████[31m██████[31m██████[34m  ▕▏  [32m██████[34m  ▕▏  [39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [31m██████[31m██████[31m██████[34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m──██──[34m──██──[34m──██──[31m██████[31m██████[31m██████[34m──██──[34m──██──[34m──██──[39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [31m██████[31m██████[31m██████[34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [39m  
+  [34m──██──[32m██████[34m──██──[34m──██──[32m██████[34m──██──[34m──██──[32m██████[34m──██──[39m  
+  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+
+AMR driver provided by CarpetX,
+using AMReX 23.08 (MPI, OpenMP, no accelerators, debug)
+--------------------------------------------------------------------------------
+
+MPI initialized with 8 MPI processes
+MPI initialized with thread support level 2
+OMP initialized with 1 OMP threads
+AMReX (23.08) initialized
+INFO (CarpetX): 
+Symmetries:
+  lower x: none
+  lower y: none
+  lower z: none
+  upper x: none
+  upper y: none
+  upper z: none
+Default boundaries:
+  lower x: neumann
+  lower y: neumann
+  lower z: neumann
+  upper x: neumann
+  upper y: neumann
+  upper z: neumann
+INFO (Arith): Test_smallvector
+INFO (Arith): Test_spvect
+INFO (CarpetX): Setting up initial conditions...
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 2
+INFO (CarpetX): Patch 0:
+INFO (CarpetX):   Grid extent:
+INFO (CarpetX):     gsh=[71,71,71]
+INFO (CarpetX):     blocking_factor=[8,8,8]
+INFO (CarpetX):     max_grid_size=[32,32,32]
+INFO (CarpetX):     max_tile_size=[1024000,16,32]
+INFO (CarpetX):   Domain extent:
+INFO (CarpetX):     xmin=[-256,-256,-256]
+INFO (CarpetX):     xmax=[256,256,256]
+INFO (CarpetX):     base dx=[8,8,8]
+INFO (CarpetX): Initializing level 0...
+INFO (TwoPunctures): Solving puncture equation for BH-BH system
+INFO (TwoPunctures): b = 6
+INFO (TwoPunctures): The two puncture masses are mp=0.80000000000000004 and mm=0.20000000000000001
+INFO (TwoPunctures): Puncture 1 ADM mass is 0.806667
+INFO (TwoPunctures): Puncture 2 ADM mass is 0.206667
+INFO (TwoPunctures): The total ADM mass is 1
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Interpolating result
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   level 0: 8 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 8 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 1
+INFO (CarpetX): Initializing level 1...
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   level 0: 8 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 8 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX):   level 2: 8 boxes, 262144 cells (1.562%, 12%)
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 0.5
+INFO (CarpetX): Initializing level 2...
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   level 0: 8 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 8 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX):   level 2: 8 boxes, 262144 cells (1.562%, 12%)
+INFO (CarpetX):   level 3: 8 boxes, 262144 cells (0.1953%, 12%)
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 0.25
+INFO (CarpetX): Initializing level 3...
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   level 0: 8 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 8 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX):   level 2: 8 boxes, 262144 cells (1.562%, 12%)
+INFO (CarpetX):   level 3: 8 boxes, 262144 cells (0.1953%, 12%)
+INFO (CarpetX):   level 4: 8 boxes, 262144 cells (0.02441%, 12%)
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 0.125
+INFO (CarpetX): Initializing level 4...
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   level 0: 8 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 8 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX):   level 2: 8 boxes, 262144 cells (1.562%, 12%)
+INFO (CarpetX):   level 3: 8 boxes, 262144 cells (0.1953%, 12%)
+INFO (CarpetX):   level 4: 12 boxes, 294912 cells (0.02747%, 14%)
+INFO (CarpetX):   level 5: 16 boxes, 491520 cells (0.005722%, 21%)
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 0.0625
+INFO (CarpetX): Initializing level 5...
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   level 0: 8 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 8 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX):   level 2: 8 boxes, 262144 cells (1.562%, 12%)
+INFO (CarpetX):   level 3: 8 boxes, 262144 cells (0.1953%, 12%)
+INFO (CarpetX):   level 4: 12 boxes, 294912 cells (0.02747%, 14%)
+INFO (CarpetX):   level 5: 16 boxes, 491520 cells (0.005722%, 21%)
+INFO (CarpetX):   level 6: 24 boxes, 688128 cells (0.001001%, 18%)
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 0.03125
+INFO (CarpetX): Initializing level 6...
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   level 0: 8 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 8 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX):   level 2: 8 boxes, 262144 cells (1.562%, 12%)
+INFO (CarpetX):   level 3: 8 boxes, 262144 cells (0.1953%, 12%)
+INFO (CarpetX):   level 4: 12 boxes, 294912 cells (0.02747%, 14%)
+INFO (CarpetX):   level 5: 16 boxes, 491520 cells (0.005722%, 21%)
+INFO (CarpetX):   level 6: 24 boxes, 688128 cells (0.001001%, 18%)
+INFO (CarpetX):   level 7: 24 boxes, 589824 cells (0.0001073%, 11%)
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 0.015625
+INFO (CarpetX): Initializing level 7...
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   level 0: 8 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 8 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX):   level 2: 8 boxes, 262144 cells (1.562%, 12%)
+INFO (CarpetX):   level 3: 8 boxes, 262144 cells (0.1953%, 12%)
+INFO (CarpetX):   level 4: 12 boxes, 294912 cells (0.02747%, 14%)
+INFO (CarpetX):   level 5: 16 boxes, 491520 cells (0.005722%, 21%)
+INFO (CarpetX):   level 6: 24 boxes, 688128 cells (0.001001%, 18%)
+INFO (CarpetX):   level 7: 24 boxes, 589824 cells (0.0001073%, 11%)
+INFO (CarpetX):   level 8: 24 boxes, 589824 cells (1.341e-05%, 12%)
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 0.0078125
+INFO (CarpetX): Initializing level 8...
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   level 0: 8 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 8 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX):   level 2: 8 boxes, 262144 cells (1.562%, 12%)
+INFO (CarpetX):   level 3: 8 boxes, 262144 cells (0.1953%, 12%)
+INFO (CarpetX):   level 4: 12 boxes, 294912 cells (0.02747%, 14%)
+INFO (CarpetX):   level 5: 16 boxes, 491520 cells (0.005722%, 21%)
+INFO (CarpetX):   level 6: 24 boxes, 688128 cells (0.001001%, 18%)
+INFO (CarpetX):   level 7: 24 boxes, 589824 cells (0.0001073%, 11%)
+INFO (CarpetX):   level 8: 24 boxes, 589824 cells (1.341e-05%, 12%)
+INFO (CarpetX):   level 9: 12 boxes, 294912 cells (8.382e-07%, 6%)
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 0.00390625
+INFO (CarpetX): Initializing level 9...
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   level 0: 8 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 8 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX):   level 2: 8 boxes, 262144 cells (1.562%, 12%)
+INFO (CarpetX):   level 3: 8 boxes, 262144 cells (0.1953%, 12%)
+INFO (CarpetX):   level 4: 12 boxes, 294912 cells (0.02747%, 14%)
+INFO (CarpetX):   level 5: 16 boxes, 491520 cells (0.005722%, 21%)
+INFO (CarpetX):   level 6: 24 boxes, 688128 cells (0.001001%, 18%)
+INFO (CarpetX):   level 7: 24 boxes, 589824 cells (0.0001073%, 11%)
+INFO (CarpetX):   level 8: 24 boxes, 589824 cells (1.341e-05%, 12%)
+INFO (CarpetX):   level 9: 12 boxes, 294912 cells (8.382e-07%, 6%)
+INFO (CarpetX):   level 10: 12 boxes, 294912 cells (1.048e-07%, 12%)
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 0.00195312
+INFO (CarpetX): Initializing level 10...
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   level 0: 8 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 8 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX):   level 2: 8 boxes, 262144 cells (1.562%, 12%)
+INFO (CarpetX):   level 3: 8 boxes, 262144 cells (0.1953%, 12%)
+INFO (CarpetX):   level 4: 12 boxes, 294912 cells (0.02747%, 14%)
+INFO (CarpetX):   level 5: 16 boxes, 491520 cells (0.005722%, 21%)
+INFO (CarpetX):   level 6: 24 boxes, 688128 cells (0.001001%, 18%)
+INFO (CarpetX):   level 7: 24 boxes, 589824 cells (0.0001073%, 11%)
+INFO (CarpetX):   level 8: 24 boxes, 589824 cells (1.341e-05%, 12%)
+INFO (CarpetX):   level 9: 12 boxes, 294912 cells (8.382e-07%, 6%)
+INFO (CarpetX):   level 10: 12 boxes, 294912 cells (1.048e-07%, 12%)
+INFO (CarpetX): Initialized 11 levels
+INFO (TimerReport): Timer Report at iteration 0 time 0
+INFO (TimerReport): Top timers at iteration 0 time 0
+======================================================================
+    %    Time/s   Min/s   Max/s   Timer (gettimeofday)
+======================================================================
+100.0   7.77214 7.66833 7.84684   Sync
+ 69.0   5.36384 5.33730 5.38943   CallFunction CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+ 62.3   4.84561 4.79028 4.87528   [0011] TwoPunctures: TwoPunctures in CCTK_INITIAL
+ 62.3   4.84558 4.79025 4.87525   CallFunction TwoPunctures_Group: TwoPunctures::TwoPunctures
+ 58.3   4.53158 4.49058 4.57176   [0029] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in CCTK_POSTINITIAL
+ 46.9   3.64581 2.16927 4.45630   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=0]
+ 21.5   1.66812 1.64733 1.68588   InitialiseRegrid [refined]
+ 12.1   0.94137 0.93218 0.96167   CallFunction CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+ 11.8   0.91881 0.73513 1.11197   Restrict
+ 11.8   0.91467 0.73105 1.10794   Restrict::average_down
+ 10.7   0.83230 0.81152 0.85133   [0045] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in CCTK_POSTSTEP
+ 10.2   0.79561 0.78514 0.80973   [0030] CanudaX_BSSNMoL: LeanBSSN_add_dissipation in CCTK_POSTINITIAL
+  5.6   0.43898 0.41733 0.45140   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+  4.7   0.36908 0.35517 0.39218   [0049] CanudaX_BSSNMoL: LeanBSSN_bssn_constraints in CCTK_ANALYSIS
+  4.7   0.36908 0.35516 0.39218   CallFunction CCTK_ANALYSIS: CanudaX_BSSNMoL::LeanBSSN_bssn_constraints
+  4.6   0.35991 0.35725 0.36230   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_reset_detmetric
+  4.2   0.32738 0.32185 0.33252   [0018] CanudaX_BSSNMoL: LeanBSSN_adm2bssn in CCTK_INITIAL
+  4.2   0.32735 0.32183 0.33249   CallFunction CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_adm2bssn
+  4.2   0.32454 0.30910 0.33516   [0027] CanudaX_BSSNMoL: LeanBSSN_bssn2adm in CCTK_POSTINITIAL
+  3.9   0.30571 0.30187 0.30934   [0024] CanudaX_BSSNMoL: LeanBSSN_reset_detmetric in CCTK_POSTINITIAL
+  3.0   0.23269 0.23098 0.23609   [0019] CanudaX_BSSNMoL: LeanBSSN_gammat in CCTK_INITIAL
+  3.0   0.23266 0.23095 0.23606   CallFunction CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_gammat
+  2.9   0.22575 0.20291 0.23659   CallFunction TmunuBaseX_SetTmunuVars: TmunuBaseX::TmunuBaseX_ZeroTmunu
+  2.2   0.16938 0.16917 0.16972   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+  2.1   0.16378 0.15481 0.17010   apply_boundary_conditions
+  1.9   0.14580 0.14260 0.15199   [0046] CanudaX_BSSNMoL: LeanBSSN_add_dissipation in CCTK_POSTSTEP
+  1.6   0.12679 0.12585 0.12767   [0025] CanudaX_BSSNMoL: LeanBSSN_remove_trA in CCTK_POSTINITIAL
+  1.2   0.09356 0.07980 0.10138   [0028] TmunuBaseX: TmunuBaseX_ZeroTmunu in CCTK_POSTINITIAL
+  1.2   0.09050 0.08603 0.09558   [0007] CanudaX_BSSNMoL: LeanBSSN_zero in CCTK_BASEGRID
+  1.2   0.09046 0.08600 0.09554   CallFunction CCTK_BASEGRID: CanudaX_BSSNMoL::LeanBSSN_zero
+  1.1   0.08745 0.07998 0.09104   [0021] TmunuBaseX: TmunuBaseX_ZeroTmunu in CCTK_INITIAL
+  0.8   0.06537 0.06456 0.06623   [0022] BoxInBox: EstimateError in CCTK_POSTINITIAL
+  0.8   0.06534 0.06454 0.06620   CallFunction CCTK_POSTINITIAL: BoxInBox::EstimateError
+  0.8   0.06265 0.06112 0.06459   [0010] CoordinatesX: CoordinatesX_Setup in CCTK_BASEGRID
+  0.8   0.06263 0.06110 0.06456   CallFunction CCTK_BASEGRID: CoordinatesX::CoordinatesX_Setup
+  0.8   0.05928 0.05167 0.06290   [0043] CanudaX_BSSNMoL: LeanBSSN_bssn2adm in CCTK_POSTSTEP
+  0.7   0.05526 0.05341 0.05668   [0036] CanudaX_BSSNMoL: LeanBSSN_bssn2adm in CCTK_POSTREGRID
+  0.6   0.04703 0.04622 0.04783   [0015] ADMBaseX: ADMBaseX_initial_dtshift in CCTK_INITIAL
+  0.6   0.04700 0.04619 0.04781   CallFunction ADMBaseX_InitialGauge: ADMBaseX::ADMBaseX_initial_dtshift
+  0.6   0.04582 0.04547 0.04609   [0014] ADMBaseX: ADMBaseX_initial_shift in CCTK_INITIAL
+======================================================================
+INFO (CarpetX): OutputGH: iteration 0, time 0.000000, run time 23 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Starting evolution...
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   old levels 11, new levels 11
+INFO (CarpetX):   level 0: 8 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 8 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX):   level 2: 8 boxes, 262144 cells (1.562%, 12%)
+INFO (CarpetX):   level 3: 8 boxes, 262144 cells (0.1953%, 12%)
+INFO (CarpetX):   level 4: 12 boxes, 294912 cells (0.02747%, 14%)
+INFO (CarpetX):   level 5: 16 boxes, 491520 cells (0.005722%, 21%)
+INFO (CarpetX):   level 6: 24 boxes, 688128 cells (0.001001%, 18%)
+INFO (CarpetX):   level 7: 24 boxes, 589824 cells (0.0001073%, 11%)
+INFO (CarpetX):   level 8: 24 boxes, 589824 cells (1.341e-05%, 12%)
+INFO (CarpetX):   level 9: 12 boxes, 294912 cells (8.382e-07%, 6%)
+INFO (CarpetX):   level 10: 12 boxes, 294912 cells (1.048e-07%, 12%)
+INFO (ODESolvers): Integrator is RK4
+INFO (CarpetX): OutputGH: iteration 1, time 0.001953, run time 35 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.00195312   Iterations per second: 0.0811277   Simulation time per second: 0.000158453
+INFO (CarpetX): Grid cells: 4.29261e+06   Grid cell updates per second: 348250
+INFO (CarpetX): Performance:
+INFO (CarpetX):   total evolution time:            12.3262 sec
+INFO (CarpetX):   total evolution compute time:    12.3262 sec
+INFO (CarpetX):   total evolution output time:     1.5974e-05 sec
+INFO (CarpetX):   total iterations:                1
+INFO (CarpetX):   total cells updated:             4.29261e+06
+INFO (CarpetX):   average interations per second: 0.0811277
+INFO (CarpetX):   average cell updates per second: 348250
+INFO (CarpetX): OutputGH: iteration 2, time 0.003906, run time 48 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.00390625   Iterations per second: 0.0774317   Simulation time per second: 0.000151234
+INFO (CarpetX): Grid cells: 4.29261e+06   Grid cell updates per second: 332384
+INFO (CarpetX): Performance:
+INFO (CarpetX):   total evolution time:            25.2409 sec
+INFO (CarpetX):   total evolution compute time:    25.2408 sec
+INFO (CarpetX):   total evolution output time:     3.29018e-05 sec
+INFO (CarpetX):   total iterations:                2
+INFO (CarpetX):   total cells updated:             8.58522e+06
+INFO (CarpetX):   average interations per second: 0.0792366
+INFO (CarpetX):   average cell updates per second: 340132
+INFO (CarpetX): OutputGH: iteration 3, time 0.005859, run time 61 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.00585938   Iterations per second: 0.0773968   Simulation time per second: 0.000151166
+INFO (CarpetX): Grid cells: 4.29261e+06   Grid cell updates per second: 332234
+INFO (CarpetX): Performance:
+INFO (CarpetX):   total evolution time:            38.1613 sec
+INFO (CarpetX):   total evolution compute time:    38.1612 sec
+INFO (CarpetX):   total evolution output time:     4.88758e-05 sec
+INFO (CarpetX):   total iterations:                3
+INFO (CarpetX):   total cells updated:             1.28778e+07
+INFO (CarpetX):   average interations per second: 0.0786137
+INFO (CarpetX):   average cell updates per second: 337458
+INFO (CarpetX): OutputGH: iteration 4, time 0.007812, run time 74 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.0078125   Iterations per second: 0.0775228   Simulation time per second: 0.000151412
+INFO (CarpetX): Grid cells: 4.29261e+06   Grid cell updates per second: 332775
+INFO (CarpetX): Performance:
+INFO (CarpetX):   total evolution time:            51.0607 sec
+INFO (CarpetX):   total evolution compute time:    51.0606 sec
+INFO (CarpetX):   total evolution output time:     6.38962e-05 sec
+INFO (CarpetX):   total iterations:                4
+INFO (CarpetX):   total cells updated:             1.71704e+07
+INFO (CarpetX):   average interations per second: 0.0783381
+INFO (CarpetX):   average cell updates per second: 336275
+INFO (CarpetX): OutputGH: iteration 5, time 0.009766, run time 87 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.00976562   Iterations per second: 0.0773948   Simulation time per second: 0.000151162
+INFO (CarpetX): Grid cells: 4.29261e+06   Grid cell updates per second: 332226
+INFO (CarpetX): Performance:
+INFO (CarpetX):   total evolution time:            63.9815 sec
+INFO (CarpetX):   total evolution compute time:    63.9814 sec
+INFO (CarpetX):   total evolution output time:     7.89165e-05 sec
+INFO (CarpetX):   total iterations:                5
+INFO (CarpetX):   total cells updated:             2.1463e+07
+INFO (CarpetX):   average interations per second: 0.0781476
+INFO (CarpetX):   average cell updates per second: 335457
+INFO (CarpetX): OutputGH: iteration 6, time 0.011719, run time 100 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.0117188   Iterations per second: 0.0775015   Simulation time per second: 0.00015137
+INFO (CarpetX): Grid cells: 4.29261e+06   Grid cell updates per second: 332683
+INFO (CarpetX): Performance:
+INFO (CarpetX):   total evolution time:            76.8844 sec
+INFO (CarpetX):   total evolution compute time:    76.8844 sec
+INFO (CarpetX):   total evolution output time:     9.29832e-05 sec
+INFO (CarpetX):   total iterations:                6
+INFO (CarpetX):   total cells updated:             2.57556e+07
+INFO (CarpetX):   average interations per second: 0.0780392
+INFO (CarpetX):   average cell updates per second: 334992
+INFO (CarpetX): OutputGH: iteration 7, time 0.013672, run time 113 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.0136719   Iterations per second: 0.0773814   Simulation time per second: 0.000151135
+INFO (CarpetX): Grid cells: 4.29261e+06   Grid cell updates per second: 332168
+INFO (CarpetX): Performance:
+INFO (CarpetX):   total evolution time:            89.8075 sec
+INFO (CarpetX):   total evolution compute time:    89.8073 sec
+INFO (CarpetX):   total evolution output time:     0.000108004 sec
+INFO (CarpetX):   total iterations:                7
+INFO (CarpetX):   total cells updated:             3.00483e+07
+INFO (CarpetX):   average interations per second: 0.0779445
+INFO (CarpetX):   average cell updates per second: 334585
+INFO (TimerReport): Timer Report at iteration 8 time 0.015625
+INFO (TimerReport): Top timers at iteration 8 time 0.015625
+======================================================================
+    %    Time/s   Min/s   Max/s   Timer (gettimeofday)
+======================================================================
+100.0   78.9048 78.7666 79.0289   [0051] ODESolvers: ODESolvers_Solve in CCTK_EVOL
+100.0   78.9048 78.7666 79.0289   CallFunction CCTK_EVOL: ODESolvers::ODESolvers_Solve
+ 95.7   75.4833 75.3687 75.7103   CallScheduleGroup
+ 63.9   50.4378 49.3933 51.4966   CallFunction CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+ 54.4   42.9458 41.4406 44.6093   Sync
+ 45.6   35.9918 35.1583 36.8738   [0052] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in ODESolvers_RHS
+ 28.3   22.3511 22.3478 22.3520   Initialise
+ 23.6   18.6356 11.0084 23.9225   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=0]
+ 12.6    9.9146  9.6813 10.1365   [0045] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in CCTK_POSTSTEP
+ 10.6    8.3620  8.1118  8.6521   CallFunction CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+  7.5    5.9429  5.7271  6.2075   [0053] CanudaX_BSSNMoL: LeanBSSN_add_dissipation in ODESolvers_RHS
+  7.1    5.5781  2.8123  8.9144   Restrict
+  7.0    5.5569  2.7918  8.8938   Restrict::average_down
+  6.1    4.8456  4.7903  4.8753   [0011] TwoPunctures: TwoPunctures in CCTK_INITIAL
+  6.1    4.8456  4.7902  4.8753   CallFunction TwoPunctures_Group: TwoPunctures::TwoPunctures
+  5.7    4.5316  4.4906  4.5718   [0029] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in CCTK_POSTINITIAL
+  5.5    4.3180  4.1524  4.5345   [0049] CanudaX_BSSNMoL: LeanBSSN_bssn_constraints in CCTK_ANALYSIS
+  5.5    4.3180  4.1524  4.5345   CallFunction CCTK_ANALYSIS: CanudaX_BSSNMoL::LeanBSSN_bssn_constraints
+  4.1    3.2468  3.1790  3.3192   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_reset_detmetric
+  3.6    2.8356  2.6031  2.9597   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+  2.9    2.3078  2.2533  2.3664   [0056] CanudaX_BSSNMoL: LeanBSSN_reset_detmetric in ODESolvers_PostStep
+  2.4    1.9155  1.7442  2.0085   [0059] CanudaX_BSSNMoL: LeanBSSN_bssn2adm in ODESolvers_PostStep
+  2.1    1.6681  1.6473  1.6859   InitialiseRegrid [refined]
+  2.1    1.6237  1.5842  1.6691   [0046] CanudaX_BSSNMoL: LeanBSSN_add_dissipation in CCTK_POSTSTEP
+  1.7    1.3531  1.3272  1.3781   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+  1.2    0.9464  0.8869  1.0085   CallFunction TmunuBaseX_SetTmunuVars: TmunuBaseX::TmunuBaseX_ZeroTmunu
+  1.2    0.9463  0.9257  0.9665   [0057] CanudaX_BSSNMoL: LeanBSSN_remove_trA in ODESolvers_PostStep
+  1.0    0.7956  0.7851  0.8097   [0030] CanudaX_BSSNMoL: LeanBSSN_add_dissipation in CCTK_POSTINITIAL
+  0.8    0.6235  0.6094  0.6381   [0040] CanudaX_BSSNMoL: LeanBSSN_reset_detmetric in CCTK_POSTSTEP
+  0.7    0.5753  0.5469  0.6173   [0060] TmunuBaseX: TmunuBaseX_ZeroTmunu in ODESolvers_PostStep
+  0.7    0.5424  0.5167  0.5748   apply_boundary_conditions
+  0.7    0.5406  0.4934  0.5665   [0043] CanudaX_BSSNMoL: LeanBSSN_bssn2adm in CCTK_POSTSTEP
+  0.4    0.3274  0.3219  0.3325   [0018] CanudaX_BSSNMoL: LeanBSSN_adm2bssn in CCTK_INITIAL
+  0.4    0.3274  0.3218  0.3325   CallFunction CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_adm2bssn
+  0.4    0.3245  0.3091  0.3352   [0027] CanudaX_BSSNMoL: LeanBSSN_bssn2adm in CCTK_POSTINITIAL
+  0.4    0.3057  0.3019  0.3093   [0024] CanudaX_BSSNMoL: LeanBSSN_reset_detmetric in CCTK_POSTINITIAL
+  0.3    0.2608  0.2551  0.2661   [0041] CanudaX_BSSNMoL: LeanBSSN_remove_trA in CCTK_POSTSTEP
+  0.3    0.2599  0.2538  0.2640   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+  0.3    0.2327  0.2310  0.2361   [0019] CanudaX_BSSNMoL: LeanBSSN_gammat in CCTK_INITIAL
+  0.3    0.2327  0.2310  0.2361   CallFunction CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_gammat
+======================================================================
+INFO (CarpetX): OutputGH: iteration 8, time 0.015625, run time 126 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.015625   Iterations per second: 0.0775169   Simulation time per second: 0.0001514
+INFO (CarpetX): Grid cells: 4.29261e+06   Grid cell updates per second: 332749
+INFO (CarpetX): Performance:
+INFO (CarpetX):   total evolution time:            102.708 sec
+INFO (CarpetX):   total evolution compute time:    102.703 sec
+INFO (CarpetX):   total evolution output time:     0.005023 sec
+INFO (CarpetX):   total iterations:                8
+INFO (CarpetX):   total cells updated:             3.43409e+07
+INFO (CarpetX):   average interations per second: 0.0778908
+INFO (CarpetX):   average cell updates per second: 334355
+INFO (CarpetX): Shutting down...
+INFO (TimerReport): Timer Report before terminating at iteration 8 time 0.015625
+INFO (TimerReport): Top timers at iteration 8 time 0.015625
+======================================================================
+    %    Time/s   Min/s   Max/s   Timer (gettimeofday)
+======================================================================
+100.0   102.709 102.708 102.709   Evolve
+ 76.8    78.905  78.767  79.029   [0051] ODESolvers: ODESolvers_Solve in CCTK_EVOL
+ 76.8    78.905  78.767  79.029   CallFunction CCTK_EVOL: ODESolvers::ODESolvers_Solve
+ 73.5    75.483  75.369  75.710   CallScheduleGroup
+ 49.1    50.438  49.393  51.497   CallFunction CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+ 41.8    42.946  41.441  44.609   Sync
+ 35.0    35.992  35.158  36.874   [0052] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in ODESolvers_RHS
+ 21.8    22.351  22.348  22.352   Initialise
+ 18.1    18.636  11.008  23.922   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=0]
+  9.7     9.915   9.681  10.137   [0045] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in CCTK_POSTSTEP
+  8.1     8.362   8.112   8.652   CallFunction CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+  5.8     5.943   5.727   6.207   [0053] CanudaX_BSSNMoL: LeanBSSN_add_dissipation in ODESolvers_RHS
+  5.4     5.578   2.812   8.914   Restrict
+  5.4     5.557   2.792   8.894   Restrict::average_down
+  4.7     4.846   4.790   4.875   [0011] TwoPunctures: TwoPunctures in CCTK_INITIAL
+  4.7     4.846   4.790   4.875   CallFunction TwoPunctures_Group: TwoPunctures::TwoPunctures
+  4.4     4.532   4.491   4.572   [0029] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in CCTK_POSTINITIAL
+  4.2     4.318   4.152   4.535   [0049] CanudaX_BSSNMoL: LeanBSSN_bssn_constraints in CCTK_ANALYSIS
+  4.2     4.318   4.152   4.534   CallFunction CCTK_ANALYSIS: CanudaX_BSSNMoL::LeanBSSN_bssn_constraints
+  3.2     3.247   3.179   3.319   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_reset_detmetric
+  2.8     2.836   2.603   2.960   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+  2.2     2.308   2.253   2.366   [0056] CanudaX_BSSNMoL: LeanBSSN_reset_detmetric in ODESolvers_PostStep
+  1.9     1.916   1.744   2.008   [0059] CanudaX_BSSNMoL: LeanBSSN_bssn2adm in ODESolvers_PostStep
+  1.6     1.668   1.647   1.686   InitialiseRegrid [refined]
+  1.6     1.624   1.584   1.669   [0046] CanudaX_BSSNMoL: LeanBSSN_add_dissipation in CCTK_POSTSTEP
+  1.3     1.353   1.327   1.378   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+  0.9     0.946   0.887   1.009   CallFunction TmunuBaseX_SetTmunuVars: TmunuBaseX::TmunuBaseX_ZeroTmunu
+  0.9     0.946   0.926   0.966   [0057] CanudaX_BSSNMoL: LeanBSSN_remove_trA in ODESolvers_PostStep
+  0.8     0.796   0.785   0.810   [0030] CanudaX_BSSNMoL: LeanBSSN_add_dissipation in CCTK_POSTINITIAL
+  0.6     0.623   0.609   0.638   [0040] CanudaX_BSSNMoL: LeanBSSN_reset_detmetric in CCTK_POSTSTEP
+  0.6     0.575   0.547   0.617   [0060] TmunuBaseX: TmunuBaseX_ZeroTmunu in ODESolvers_PostStep
+  0.5     0.542   0.517   0.575   apply_boundary_conditions
+  0.5     0.541   0.493   0.566   [0043] CanudaX_BSSNMoL: LeanBSSN_bssn2adm in CCTK_POSTSTEP
+  0.3     0.327   0.322   0.333   [0018] CanudaX_BSSNMoL: LeanBSSN_adm2bssn in CCTK_INITIAL
+  0.3     0.327   0.322   0.332   CallFunction CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_adm2bssn
+  0.3     0.325   0.309   0.335   [0027] CanudaX_BSSNMoL: LeanBSSN_bssn2adm in CCTK_POSTINITIAL
+  0.3     0.306   0.302   0.309   [0024] CanudaX_BSSNMoL: LeanBSSN_reset_detmetric in CCTK_POSTINITIAL
+  0.3     0.261   0.255   0.266   [0041] CanudaX_BSSNMoL: LeanBSSN_remove_trA in CCTK_POSTSTEP
+  0.3     0.260   0.254   0.264   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+  0.2     0.233   0.231   0.236   [0019] CanudaX_BSSNMoL: LeanBSSN_gammat in CCTK_INITIAL
+======================================================================
+AMReX (23.08) finalized
+--------------------------------------------------------------------------------
+Done.

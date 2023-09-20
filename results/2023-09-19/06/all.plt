@@ -131,7 +131,7 @@ set xlabel "trial #"
 set xlabel  font "" textcolor lt -1 norotate
 set x2label "" 
 set x2label  font "" textcolor lt -1 norotate
-set xrange [ 37.9130 : 47.2287 ] noreverse writeback
+set xrange [ * : * ] noreverse writeback
 set x2range [ 37.5970 : 46.8352 ] noreverse writeback
 set ylabel "iterations per second" 
 set ylabel  font "" textcolor lt -1 rotate

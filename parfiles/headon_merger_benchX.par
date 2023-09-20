@@ -41,8 +41,8 @@ CarpetX::ncells_z = 64
 
 # winning combination on Roland's workstation
 CarpetX::max_tile_size_x = 10000000
-CarpetX::max_tile_size_y = 32
-CarpetX::max_tile_size_z = 8
+CarpetX::max_tile_size_y = 16
+CarpetX::max_tile_size_z = 16
 CarpetX::max_grid_size_x = 64
 CarpetX::max_grid_size_y = 64
 CarpetX::max_grid_size_z = 64

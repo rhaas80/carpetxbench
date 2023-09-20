@@ -1,0 +1,625 @@
+--------------------------------------------------------------------------------
+
+       10                                  
+  1   0101       ************************  
+  01  1010 10      The Cactus Code V4.14.0    
+ 1010 1101 011      www.cactuscode.org     
+  1001 100101    ************************  
+    00010101                               
+     100011     (c) Copyright The Authors  
+      0100      GNU Licensed. No Warranty  
+      0101                                 
+--------------------------------------------------------------------------------
+
+Cactus version:    4.14.0
+Compile date:      Sep 19 2023 (10:26:47)
+Run date:          Sep 19 2023 (17:40:43-0500)
+Run host:          ekohaes8 (pid=3875230)
+Working directory: /data/rhaas/simulations/11
+Executable:        /home/rhaas/postdoc/gr/cactus/CanudaX/exe/cactus_sim
+Parameter file:    headon_merger_benchX_grid64x64x64_tile16x4.par
+--------------------------------------------------------------------------------
+
+Activating thorn Cactus...Success -> active implementation Cactus
+Activation requested for 
+--->ADMBaseX CanudaX_BSSNMoL CarpetX CoordinatesX BoxInBox ODESolvers IOUtil TimerReport TmunuBaseX TwoPunctures<---
+Thorn ADMBaseX requests automatic activation of Loop
+Thorn CarpetX requests automatic activation of AMReX
+Thorn CarpetX requests automatic activation of MPI
+Thorn CarpetX requests automatic activation of yaml_cpp
+Thorn CarpetX requests automatic activation of zlib
+Thorn CarpetX requests automatic activation of Arith
+Thorn CarpetX requests automatic activation of ADIOS2
+Thorn CarpetX requests automatic activation of CUDA
+Thorn CarpetX requests automatic activation of openPMD
+Thorn CarpetX requests automatic activation of Silo
+Thorn TwoPunctures requests automatic activation of GSL
+Thorn ADIOS2 requests automatic activation of CMake
+Thorn Arith requests automatic activation of NSIMD
+Thorn MPI requests automatic activation of hwloc
+Thorn openPMD requests automatic activation of HDF5
+Activating thorn ADIOS2...Success -> active implementation ADIOS2
+Activating thorn ADMBaseX...Success -> active implementation ADMBaseX
+Activating thorn AMReX...Success -> active implementation AMReX
+Activating thorn Arith...Success -> active implementation Arith
+Activating thorn BoxInBox...Success -> active implementation BoxInBox
+Activating thorn CanudaX_BSSNMoL...Success -> active implementation CanudaX_BSSNMoL
+Activating thorn CarpetX...Success -> active implementation CarpetX
+Activating thorn CMake...Success -> active implementation CMake
+Activating thorn CoordinatesX...Success -> active implementation CoordinatesX
+Activating thorn CUDA...Success -> active implementation CUDA
+Activating thorn GSL...Success -> active implementation GSL
+Activating thorn HDF5...Success -> active implementation HDF5
+Activating thorn hwloc...Success -> active implementation hwloc
+Activating thorn IOUtil...Success -> active implementation IO
+Activating thorn Loop...Success -> active implementation Loop
+Activating thorn MPI...Success -> active implementation MPI
+Activating thorn NSIMD...Success -> active implementation NSIMD
+Activating thorn ODESolvers...Success -> active implementation ODESolvers
+Activating thorn openPMD...Success -> active implementation openPMD
+Activating thorn Silo...Success -> active implementation Silo
+Activating thorn TimerReport...Success -> active implementation timerreport
+Activating thorn TmunuBaseX...Success -> active implementation TmunuBaseX
+Activating thorn TwoPunctures...Success -> active implementation TwoPunctures
+Activating thorn yaml_cpp...Success -> active implementation yaml_cpp
+Activating thorn zlib...Success -> active implementation zlib
+--------------------------------------------------------------------------------
+  if (recover initial data)
+    Recover parameters
+  endif
+
+  Startup routines
+    [CCTK_STARTUP]
+      CarpetX::Driver_Startup: Start up the driver
+      IOUtil::IOUtil_Startup: Startup routine
+      GROUP hwloc_startup: hwloc startup group
+        hwloc::hwloc_version: Output hwloc version
+
+  Startup routines which need an existing grid hierarchy
+    [CCTK_WRAGH]
+      Arith::Test_smallvector: [meta] Test small vectors
+      Arith::Test_spvect: [meta] Test sparse vectors
+  Parameter checking routines
+    [CCTK_PARAMCHECK]
+      CanudaX_BSSNMoL::Lean_ParamCheck: Check Lean parameters for consistency
+
+  Initialisation
+    if (NOT (recover initial data AND recovery_mode is 'strict'))
+      [CCTK_PREREGRIDINITIAL]
+      Set up grid hierarchy
+      [CCTK_POSTREGRIDINITIAL]
+      [CCTK_BASEGRID]
+        CanudaX_BSSNMoL::LeanBSSN_zero: Set everywhere grid functions to zero to prevent spurious nans
+        CanudaX_BSSNMoL::LeanBSSN_zero_constr: Set everywhere constraints grid functions to zero to prevent spurious nans
+        CarpetX::CarpetX_InitError: Initialize regridding error to zero
+        CoordinatesX::CoordinatesX_Setup: Set coordinate grid functions
+        GROUP ODESolvers_BaseGrid: Set up constants (e.g. coordinates) everywhere on the grid
+      [CCTK_INITIAL]
+        GROUP ADMBaseX_InitialData: Schedule group for calculating ADM initial data
+          ADMBaseX::ADMBaseX_initial_data: Set up Cartesian Minkowski initial data
+        GROUP ADMBaseX_InitialGauge: Schedule group for the ADM initial gauge condition
+          ADMBaseX::ADMBaseX_initial_lapse: Set lapse to one
+          ADMBaseX::ADMBaseX_initial_dtlapse: Set dtlapse to zero
+          ADMBaseX::ADMBaseX_initial_shift: Set shift to zero
+          ADMBaseX::ADMBaseX_initial_dtshift: Set dtshift to zero
+        GROUP ADMBaseX_PostInitial: Schedule group for modifying the ADM initial data, such as e.g. adding noise
+        BoxInBox::BoxInBox_Init: [global] Initialize
+        GROUP CanudaX_BSSNMoL_InitialGroup: CanudaX : initial bin
+          CanudaX_BSSNMoL::LeanBSSN_slicing_condition: Enforces choice of slicing conditions
+          CanudaX_BSSNMoL::LeanBSSN_adm2bssn: [local] Convert initial data into BSSN variables
+          CanudaX_BSSNMoL::LeanBSSN_gammat: [local] Set Gammat initial data
+          CanudaX_BSSNMoL::CanudaX_Sync: [global] Sync BSSN variables
+        GROUP ODESolvers_Initial: Set up initial conditions on interior of state vector
+        GROUP TmunuBaseX_SetTmunuVars: Schedule group for setting T_munu
+          TmunuBaseX::TmunuBaseX_ZeroTmunu: Set T_munu to zero
+          GROUP TmunuBaseX_AddToTmunu: Add to T_munu here
+      [CCTK_POSTINITIAL]
+        BoxInBox::EstimateError: Estimate error
+        GROUP ODESolvers_PostStep: Apply boundary conditions to state vector, and project if necessary
+          GROUP ADMBaseX_SetADMVars: Set ADM variables in this group
+          GROUP ADMBaseX_SetADMRHS: Set ADM RHS variables in this group
+          GROUP CanudaX_BSSNMoL_PostStepGroup: CanudaX : post-step operations
+            CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor: Make sure conformal factor does not drop below specified value
+            CanudaX_BSSNMoL::LeanBSSN_reset_detmetric: reset dethh = 1
+            CanudaX_BSSNMoL::LeanBSSN_remove_trA: Remove trace of A
+            CanudaX_BSSNMoL::CanudaX_Sync: [global] Sync state vector
+            CanudaX_BSSNMoL::LeanBSSN_bssn2adm: [local] Convert variables back to the ADM ones
+          GROUP TmunuBaseX_SetTmunuVars: Schedule group for setting T_munu
+            TmunuBaseX::TmunuBaseX_ZeroTmunu: Set T_munu to zero
+            GROUP TmunuBaseX_AddToTmunu: Add to T_munu here
+        GROUP ODESolvers_RHS: Evaluate RHS for of state vector everywhere on the grid
+          GROUP CanudaX_BSSNMoL_RHSGroup: CanudaX : calculate BSSN RHS
+            CanudaX_BSSNMoL::LeanBSSN_CalcRHS: MoL RHS calculation
+            CanudaX_BSSNMoL::LeanBSSN_add_dissipation: Add KO dissipation
+            CanudaX_BSSNMoL::LeanBSSN_apply_boundary_conditions: Apply radiative boundary conditions 
+        GROUP ODESolvers_EstimateError: Estimate discretization error (for regridding)
+      Initialise finer grids recursively
+      Restrict from finer grids
+      [CCTK_POSTRESTRICTINITIAL]
+      [CCTK_POSTPOSTINITIAL]
+      [CCTK_POSTSTEP]
+        BoxInBox::EstimateError: Estimate error
+        GROUP ODESolvers_PostStep: Apply boundary conditions to state vector, and project if necessary
+          GROUP ADMBaseX_SetADMVars: Set ADM variables in this group
+          GROUP ADMBaseX_SetADMRHS: Set ADM RHS variables in this group
+          GROUP CanudaX_BSSNMoL_PostStepGroup: CanudaX : post-step operations
+            CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor: Make sure conformal factor does not drop below specified value
+            CanudaX_BSSNMoL::LeanBSSN_reset_detmetric: reset dethh = 1
+            CanudaX_BSSNMoL::LeanBSSN_remove_trA: Remove trace of A
+            CanudaX_BSSNMoL::CanudaX_Sync: [global] Sync state vector
+            CanudaX_BSSNMoL::LeanBSSN_bssn2adm: [local] Convert variables back to the ADM ones
+          GROUP TmunuBaseX_SetTmunuVars: Schedule group for setting T_munu
+            TmunuBaseX::TmunuBaseX_ZeroTmunu: Set T_munu to zero
+            GROUP TmunuBaseX_AddToTmunu: Add to T_munu here
+        GROUP ODESolvers_RHS: Evaluate the RHS for of state vector everywhere on the grid
+          GROUP CanudaX_BSSNMoL_RHSGroup: CanudaX : calculate BSSN RHS
+            CanudaX_BSSNMoL::LeanBSSN_CalcRHS: MoL RHS calculation
+            CanudaX_BSSNMoL::LeanBSSN_add_dissipation: Add KO dissipation
+            CanudaX_BSSNMoL::LeanBSSN_apply_boundary_conditions: Apply radiative boundary conditions 
+        GROUP ODESolvers_EstimateError: Estimate discretization error (for regridding)
+    endif
+    if (recover initial data)
+      [CCTK_BASEGRID]
+        CanudaX_BSSNMoL::LeanBSSN_zero: Set everywhere grid functions to zero to prevent spurious nans
+        CanudaX_BSSNMoL::LeanBSSN_zero_constr: Set everywhere constraints grid functions to zero to prevent spurious nans
+        CarpetX::CarpetX_InitError: Initialize regridding error to zero
+        CoordinatesX::CoordinatesX_Setup: Set coordinate grid functions
+        GROUP ODESolvers_BaseGrid: Set up constants (e.g. coordinates) everywhere on the grid
+      [CCTK_RECOVER_VARIABLES]
+      [CCTK_POST_RECOVER_VARIABLES]
+    endif
+    if (checkpoint initial data)
+      [CCTK_CPINITIAL]
+        CarpetX::CarpetX_CheckpointInitial: [meta] Checkpoint initial conditions
+    endif
+    if (analysis)
+      [CCTK_ANALYSIS]
+        CanudaX_BSSNMoL::LeanBSSN_bssn_constraints: Compute constraints
+        GROUP ODESolvers_Analysis: Calculate analysis quantities everywhere
+        TimerReport::zzz_TimerReport_Output: [global] Print the timer report
+  endif
+  Output grid variables
+
+  do loop over timesteps
+    [CCTK_PREREGRID]
+    Change grid hierarchy
+    [CCTK_POSTREGRID]
+      GROUP ODESolvers_PostStep: Apply boundary conditions to state vector, and project if necessary
+        GROUP ADMBaseX_SetADMVars: Set ADM variables in this group
+        GROUP ADMBaseX_SetADMRHS: Set ADM RHS variables in this group
+        GROUP CanudaX_BSSNMoL_PostStepGroup: CanudaX : post-step operations
+          CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor: Make sure conformal factor does not drop below specified value
+          CanudaX_BSSNMoL::LeanBSSN_reset_detmetric: reset dethh = 1
+          CanudaX_BSSNMoL::LeanBSSN_remove_trA: Remove trace of A
+          CanudaX_BSSNMoL::CanudaX_Sync: [global] Sync state vector
+          CanudaX_BSSNMoL::LeanBSSN_bssn2adm: [local] Convert variables back to the ADM ones
+        GROUP TmunuBaseX_SetTmunuVars: Schedule group for setting T_munu
+          TmunuBaseX::TmunuBaseX_ZeroTmunu: Set T_munu to zero
+          GROUP TmunuBaseX_AddToTmunu: Add to T_munu here
+    Rotate timelevels
+    iteration = iteration+1
+    t = t+dt
+    [CCTK_PRESTEP]
+    [CCTK_EVOL]
+      ODESolvers::ODESolvers_Solve: [level] Solve ODEs
+    Evolve finer grids recursively
+    Restrict from finer grids
+    [CCTK_POSTRESTRICT]
+      GROUP ODESolvers_PostStep: Apply boundary conditions to state vector, and project if necessary
+        GROUP ADMBaseX_SetADMVars: Set ADM variables in this group
+        GROUP ADMBaseX_SetADMRHS: Set ADM RHS variables in this group
+        GROUP CanudaX_BSSNMoL_PostStepGroup: CanudaX : post-step operations
+          CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor: Make sure conformal factor does not drop below specified value
+          CanudaX_BSSNMoL::LeanBSSN_reset_detmetric: reset dethh = 1
+          CanudaX_BSSNMoL::LeanBSSN_remove_trA: Remove trace of A
+          CanudaX_BSSNMoL::CanudaX_Sync: [global] Sync state vector
+          CanudaX_BSSNMoL::LeanBSSN_bssn2adm: [local] Convert variables back to the ADM ones
+        GROUP TmunuBaseX_SetTmunuVars: Schedule group for setting T_munu
+          TmunuBaseX::TmunuBaseX_ZeroTmunu: Set T_munu to zero
+          GROUP TmunuBaseX_AddToTmunu: Add to T_munu here
+    [CCTK_POSTSTEP]
+      BoxInBox::EstimateError: Estimate error
+      GROUP ODESolvers_PostStep: Apply boundary conditions to state vector, and project if necessary
+        GROUP ADMBaseX_SetADMVars: Set ADM variables in this group
+        GROUP ADMBaseX_SetADMRHS: Set ADM RHS variables in this group
+        GROUP CanudaX_BSSNMoL_PostStepGroup: CanudaX : post-step operations
+          CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor: Make sure conformal factor does not drop below specified value
+          CanudaX_BSSNMoL::LeanBSSN_reset_detmetric: reset dethh = 1
+          CanudaX_BSSNMoL::LeanBSSN_remove_trA: Remove trace of A
+          CanudaX_BSSNMoL::CanudaX_Sync: [global] Sync state vector
+          CanudaX_BSSNMoL::LeanBSSN_bssn2adm: [local] Convert variables back to the ADM ones
+        GROUP TmunuBaseX_SetTmunuVars: Schedule group for setting T_munu
+          TmunuBaseX::TmunuBaseX_ZeroTmunu: Set T_munu to zero
+          GROUP TmunuBaseX_AddToTmunu: Add to T_munu here
+      GROUP ODESolvers_RHS: Evaluate the RHS for of state vector everywhere on the grid
+        GROUP CanudaX_BSSNMoL_RHSGroup: CanudaX : calculate BSSN RHS
+          CanudaX_BSSNMoL::LeanBSSN_CalcRHS: MoL RHS calculation
+          CanudaX_BSSNMoL::LeanBSSN_add_dissipation: Add KO dissipation
+          CanudaX_BSSNMoL::LeanBSSN_apply_boundary_conditions: Apply radiative boundary conditions 
+      GROUP ODESolvers_EstimateError: Estimate discretization error (for regridding)
+    if (checkpoint)
+      [CCTK_CHECKPOINT]
+      CarpetX::CarpetX_Checkpoint: [meta] Checkpoint
+      TimerReport::zzz_TimerReport_Checkpoint: [global] Print the timer report
+    endif
+    if (analysis)
+      [CCTK_ANALYSIS]
+      CanudaX_BSSNMoL::LeanBSSN_bssn_constraints: Compute constraints
+      GROUP ODESolvers_Analysis: Calculate analysis quantities everywhere
+      TimerReport::zzz_TimerReport_Output: [global] Print the timer report
+    endif
+    Output grid variables
+    enddo
+
+  Termination routines
+    [CCTK_TERMINATE]
+      CarpetX::CarpetX_CheckpointTerminate: [meta] Checkpoint before terminating
+      TimerReport::zzz_TimerReport_Output: [global] Print the timer report
+
+  Shutdown routines
+    [CCTK_SHUTDOWN]
+      CarpetX::Driver_Shutdown: [meta] Shut down the driver
+
+  Routines run after changing the grid hierarchy:
+    [CCTK_POSTREGRID]
+      GROUP ODESolvers_PostStep: Apply boundary conditions to state vector, and project if necessary
+        GROUP ADMBaseX_SetADMVars: Set ADM variables in this group
+        GROUP ADMBaseX_SetADMRHS: Set ADM RHS variables in this group
+        GROUP CanudaX_BSSNMoL_PostStepGroup: CanudaX : post-step operations
+          CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor: Make sure conformal factor does not drop below specified value
+          CanudaX_BSSNMoL::LeanBSSN_reset_detmetric: reset dethh = 1
+          CanudaX_BSSNMoL::LeanBSSN_remove_trA: Remove trace of A
+          CanudaX_BSSNMoL::CanudaX_Sync: [global] Sync state vector
+          CanudaX_BSSNMoL::LeanBSSN_bssn2adm: [local] Convert variables back to the ADM ones
+        GROUP TmunuBaseX_SetTmunuVars: Schedule group for setting T_munu
+          TmunuBaseX::TmunuBaseX_ZeroTmunu: Set T_munu to zero
+          GROUP TmunuBaseX_AddToTmunu: Add to T_munu here
+--------------------------------------------------------------------------------
+INFO (hwloc): library version 2.9.2, API version 0x20800
+--------------------------------------------------------------------------------
+
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [39m  
+  [34m──██──[32m██████[34m──██──[34m──██──[32m██████[34m──██──[34m──██──[32m██████[34m──██──[39m  
+  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [31m██████[31m██████[31m██████[34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m──██──[34m──██──[34m──██──[31m██████[31m██████[31m██████[34m──██──[34m──██──[34m──██──[39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [31m██████[31m██████[31m██████[34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m  ▕▏  [32m██████[34m  ▕▏  [31m██████[31m██████[31m██████[34m  ▕▏  [32m██████[34m  ▕▏  [39m  
+  [34m──██──[32m██████[34m──██──[31m██████[31m██████[31m██████[34m──██──[32m██████[34m──██──[39m  
+  [34m  ▕▏  [32m██████[34m  ▕▏  [31m██████[31m██████[31m██████[34m  ▕▏  [32m██████[34m  ▕▏  [39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [31m██████[31m██████[31m██████[34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m──██──[34m──██──[34m──██──[31m██████[31m██████[31m██████[34m──██──[34m──██──[34m──██──[39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [31m██████[31m██████[31m██████[34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [39m  
+  [34m──██──[32m██████[34m──██──[34m──██──[32m██████[34m──██──[34m──██──[32m██████[34m──██──[39m  
+  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+
+AMR driver provided by CarpetX,
+using AMReX 23.08 (MPI, OpenMP, no accelerators, debug)
+--------------------------------------------------------------------------------
+
+MPI initialized with 1 MPI processes
+MPI initialized with thread support level 2
+OMP initialized with 8 OMP threads
+AMReX (23.08) initialized
+INFO (CarpetX): 
+Symmetries:
+  lower x: none
+  lower y: none
+  lower z: none
+  upper x: none
+  upper y: none
+  upper z: none
+Default boundaries:
+  lower x: neumann
+  lower y: neumann
+  lower z: neumann
+  upper x: neumann
+  upper y: neumann
+  upper z: neumann
+INFO (Arith): Test_smallvector
+INFO (Arith): Test_spvect
+INFO (CarpetX): Setting up initial conditions...
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 2
+INFO (CarpetX): Patch 0:
+INFO (CarpetX):   Grid extent:
+INFO (CarpetX):     gsh=[71,71,71]
+INFO (CarpetX):     blocking_factor=[8,8,8]
+INFO (CarpetX):     max_grid_size=[64,64,64]
+INFO (CarpetX):     max_tile_size=[10000000,16,4]
+INFO (CarpetX):   Domain extent:
+INFO (CarpetX):     xmin=[-256,-256,-256]
+INFO (CarpetX):     xmax=[256,256,256]
+INFO (CarpetX):     base dx=[8,8,8]
+INFO (CarpetX): Initializing level 0...
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   level 0: 1 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 1 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 1
+INFO (CarpetX): Initializing level 1...
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   level 0: 1 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 1 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX):   level 2: 1 boxes, 262144 cells (1.562%, 12%)
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 0.5
+INFO (CarpetX): Initializing level 2...
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   level 0: 1 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 1 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX):   level 2: 1 boxes, 262144 cells (1.562%, 12%)
+INFO (CarpetX):   level 3: 1 boxes, 262144 cells (0.1953%, 12%)
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 0.25
+INFO (CarpetX): Initializing level 3...
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   level 0: 1 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 1 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX):   level 2: 1 boxes, 262144 cells (1.562%, 12%)
+INFO (CarpetX):   level 3: 1 boxes, 262144 cells (0.1953%, 12%)
+INFO (CarpetX):   level 4: 1 boxes, 262144 cells (0.02441%, 12%)
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 0.125
+INFO (CarpetX): Initializing level 4...
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   level 0: 1 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 1 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX):   level 2: 1 boxes, 262144 cells (1.562%, 12%)
+INFO (CarpetX):   level 3: 1 boxes, 262144 cells (0.1953%, 12%)
+INFO (CarpetX):   level 4: 2 boxes, 294912 cells (0.02747%, 14%)
+INFO (CarpetX):   level 5: 2 boxes, 491520 cells (0.005722%, 21%)
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 0.0625
+INFO (CarpetX): Initializing level 5...
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   level 0: 1 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 1 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX):   level 2: 1 boxes, 262144 cells (1.562%, 12%)
+INFO (CarpetX):   level 3: 1 boxes, 262144 cells (0.1953%, 12%)
+INFO (CarpetX):   level 4: 2 boxes, 294912 cells (0.02747%, 14%)
+INFO (CarpetX):   level 5: 2 boxes, 491520 cells (0.005722%, 21%)
+INFO (CarpetX):   level 6: 3 boxes, 688128 cells (0.001001%, 18%)
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 0.03125
+INFO (CarpetX): Initializing level 6...
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   level 0: 1 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 1 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX):   level 2: 1 boxes, 262144 cells (1.562%, 12%)
+INFO (CarpetX):   level 3: 1 boxes, 262144 cells (0.1953%, 12%)
+INFO (CarpetX):   level 4: 2 boxes, 294912 cells (0.02747%, 14%)
+INFO (CarpetX):   level 5: 2 boxes, 491520 cells (0.005722%, 21%)
+INFO (CarpetX):   level 6: 3 boxes, 688128 cells (0.001001%, 18%)
+INFO (CarpetX):   level 7: 4 boxes, 589824 cells (0.0001073%, 11%)
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 0.015625
+INFO (CarpetX): Initializing level 7...
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   level 0: 1 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 1 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX):   level 2: 1 boxes, 262144 cells (1.562%, 12%)
+INFO (CarpetX):   level 3: 1 boxes, 262144 cells (0.1953%, 12%)
+INFO (CarpetX):   level 4: 2 boxes, 294912 cells (0.02747%, 14%)
+INFO (CarpetX):   level 5: 2 boxes, 491520 cells (0.005722%, 21%)
+INFO (CarpetX):   level 6: 3 boxes, 688128 cells (0.001001%, 18%)
+INFO (CarpetX):   level 7: 4 boxes, 589824 cells (0.0001073%, 11%)
+INFO (CarpetX):   level 8: 4 boxes, 589824 cells (1.341e-05%, 12%)
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 0.0078125
+INFO (CarpetX): Initializing level 8...
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   level 0: 1 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 1 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX):   level 2: 1 boxes, 262144 cells (1.562%, 12%)
+INFO (CarpetX):   level 3: 1 boxes, 262144 cells (0.1953%, 12%)
+INFO (CarpetX):   level 4: 2 boxes, 294912 cells (0.02747%, 14%)
+INFO (CarpetX):   level 5: 2 boxes, 491520 cells (0.005722%, 21%)
+INFO (CarpetX):   level 6: 3 boxes, 688128 cells (0.001001%, 18%)
+INFO (CarpetX):   level 7: 4 boxes, 589824 cells (0.0001073%, 11%)
+INFO (CarpetX):   level 8: 4 boxes, 589824 cells (1.341e-05%, 12%)
+INFO (CarpetX):   level 9: 2 boxes, 294912 cells (8.382e-07%, 6%)
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 0.00390625
+INFO (CarpetX): Initializing level 9...
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   level 0: 1 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 1 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX):   level 2: 1 boxes, 262144 cells (1.562%, 12%)
+INFO (CarpetX):   level 3: 1 boxes, 262144 cells (0.1953%, 12%)
+INFO (CarpetX):   level 4: 2 boxes, 294912 cells (0.02747%, 14%)
+INFO (CarpetX):   level 5: 2 boxes, 491520 cells (0.005722%, 21%)
+INFO (CarpetX):   level 6: 3 boxes, 688128 cells (0.001001%, 18%)
+INFO (CarpetX):   level 7: 4 boxes, 589824 cells (0.0001073%, 11%)
+INFO (CarpetX):   level 8: 4 boxes, 589824 cells (1.341e-05%, 12%)
+INFO (CarpetX):   level 9: 2 boxes, 294912 cells (8.382e-07%, 6%)
+INFO (CarpetX):   level 10: 2 boxes, 294912 cells (1.048e-07%, 12%)
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 0.00195312
+INFO (CarpetX): Initializing level 10...
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   level 0: 1 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 1 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX):   level 2: 1 boxes, 262144 cells (1.562%, 12%)
+INFO (CarpetX):   level 3: 1 boxes, 262144 cells (0.1953%, 12%)
+INFO (CarpetX):   level 4: 2 boxes, 294912 cells (0.02747%, 14%)
+INFO (CarpetX):   level 5: 2 boxes, 491520 cells (0.005722%, 21%)
+INFO (CarpetX):   level 6: 3 boxes, 688128 cells (0.001001%, 18%)
+INFO (CarpetX):   level 7: 4 boxes, 589824 cells (0.0001073%, 11%)
+INFO (CarpetX):   level 8: 4 boxes, 589824 cells (1.341e-05%, 12%)
+INFO (CarpetX):   level 9: 2 boxes, 294912 cells (8.382e-07%, 6%)
+INFO (CarpetX):   level 10: 2 boxes, 294912 cells (1.048e-07%, 12%)
+INFO (CarpetX): Initialized 11 levels
+INFO (TimerReport): Timer Report at iteration 0 time 0
+INFO (TimerReport): Top timers at iteration 0 time 0
+======================================================================
+    %    Time/s   Min/s   Max/s   Timer (gettimeofday)
+======================================================================
+100.0   11.5589 11.5589 11.5589   Sync
+ 59.0    6.8140  6.8140  6.8140   CallFunction CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+ 58.8    6.7992  6.7992  6.7992   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=0]
+ 51.4    5.9436  5.9436  5.9436   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=1]
+ 50.5    5.8363  5.8363  5.8363   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=2]
+ 49.7    5.7498  5.7498  5.7498   [0028] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in CCTK_POSTINITIAL
+ 48.8    5.6373  5.6373  5.6373   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=3]
+ 37.9    4.3866  4.3866  4.3866   apply_boundary_conditions
+ 33.2    3.8332  3.8332  3.8332   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=4]
+ 33.0    3.8125  3.8125  3.8125   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=5]
+ 25.3    2.9296  2.9296  2.9296   InitialiseRegrid [refined]
+ 11.2    1.2925  1.2925  1.2925   CallFunction CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+  9.5    1.0961  1.0961  1.0961   [0029] CanudaX_BSSNMoL: LeanBSSN_add_dissipation in CCTK_POSTINITIAL
+  9.2    1.0642  1.0642  1.0642   [0044] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in CCTK_POSTSTEP
+  4.5    0.5179  0.5179  0.5179   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=7]
+  4.5    0.5163  0.5163  0.5163   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=6]
+  4.1    0.4722  0.4722  0.4722   [0048] CanudaX_BSSNMoL: LeanBSSN_bssn_constraints in CCTK_ANALYSIS
+  4.1    0.4722  0.4722  0.4722   CallFunction CCTK_ANALYSIS: CanudaX_BSSNMoL::LeanBSSN_bssn_constraints
+  3.2    0.3748  0.3748  0.3748   Restrict
+  3.2    0.3713  0.3713  0.3713   Restrict::average_down
+  3.0    0.3518  0.3518  0.3518   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_reset_detmetric
+  3.0    0.3478  0.3478  0.3478   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+  2.5    0.2888  0.2888  0.2888   [0023] CanudaX_BSSNMoL: LeanBSSN_reset_detmetric in CCTK_POSTINITIAL
+  2.5    0.2880  0.2880  0.2880   [0018] CanudaX_BSSNMoL: LeanBSSN_gammat in CCTK_INITIAL
+  2.5    0.2879  0.2879  0.2879   CallFunction CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_gammat
+  2.4    0.2809  0.2809  0.2809   [0017] CanudaX_BSSNMoL: LeanBSSN_adm2bssn in CCTK_INITIAL
+  2.4    0.2809  0.2809  0.2809   CallFunction CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_adm2bssn
+  2.0    0.2350  0.2350  0.2350   CallFunction TmunuBaseX_SetTmunuVars: TmunuBaseX::TmunuBaseX_ZeroTmunu
+  2.0    0.2297  0.2297  0.2297   [0026] CanudaX_BSSNMoL: LeanBSSN_bssn2adm in CCTK_POSTINITIAL
+  1.7    0.1972  0.1972  0.1972   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+  1.7    0.1964  0.1964  0.1964   [0045] CanudaX_BSSNMoL: LeanBSSN_add_dissipation in CCTK_POSTSTEP
+  1.3    0.1500  0.1500  0.1500   [0024] CanudaX_BSSNMoL: LeanBSSN_remove_trA in CCTK_POSTINITIAL
+  1.0    0.1189  0.1189  0.1189   [0006] CanudaX_BSSNMoL: LeanBSSN_zero in CCTK_BASEGRID
+  1.0    0.1188  0.1188  0.1188   CallFunction CCTK_BASEGRID: CanudaX_BSSNMoL::LeanBSSN_zero
+  0.9    0.1068  0.1068  0.1068   [0010] ADMBaseX: ADMBaseX_initial_data in CCTK_INITIAL
+  0.9    0.1068  0.1068  0.1068   CallFunction ADMBaseX_InitialData: ADMBaseX::ADMBaseX_initial_data
+  0.8    0.0887  0.0887  0.0887   [0020] TmunuBaseX: TmunuBaseX_ZeroTmunu in CCTK_INITIAL
+  0.7    0.0865  0.0865  0.0865   [0027] TmunuBaseX: TmunuBaseX_ZeroTmunu in CCTK_POSTINITIAL
+  0.7    0.0791  0.0791  0.0791   [0021] BoxInBox: EstimateError in CCTK_POSTINITIAL
+  0.7    0.0791  0.0791  0.0791   CallFunction CCTK_POSTINITIAL: BoxInBox::EstimateError
+======================================================================
+INFO (CarpetX): OutputGH: iteration 0, time 0.000000, run time 25 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Starting evolution...
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   old levels 11, new levels 11
+INFO (CarpetX):   level 0: 1 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 1 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX):   level 2: 1 boxes, 262144 cells (1.562%, 12%)
+INFO (CarpetX):   level 3: 1 boxes, 262144 cells (0.1953%, 12%)
+INFO (CarpetX):   level 4: 2 boxes, 294912 cells (0.02747%, 14%)
+INFO (CarpetX):   level 5: 2 boxes, 491520 cells (0.005722%, 21%)
+INFO (CarpetX):   level 6: 3 boxes, 688128 cells (0.001001%, 18%)
+INFO (CarpetX):   level 7: 4 boxes, 589824 cells (0.0001073%, 11%)
+INFO (CarpetX):   level 8: 4 boxes, 589824 cells (1.341e-05%, 12%)
+INFO (CarpetX):   level 9: 2 boxes, 294912 cells (8.382e-07%, 6%)
+INFO (CarpetX):   level 10: 2 boxes, 294912 cells (1.048e-07%, 12%)
+INFO (ODESolvers): Integrator is RK4
+INFO (TimerReport): Timer Report at iteration 1 time 0.00195312
+INFO (TimerReport): Top timers at iteration 1 time 0.00195312
+======================================================================
+    %    Time/s   Min/s   Max/s   Timer (gettimeofday)
+======================================================================
+100.0   24.6330 24.6330 24.6330   Initialise
+ 65.2   16.0706 16.0706 16.0706   Sync
+ 49.3   12.1436 12.1436 12.1436   CallFunction CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+ 39.1    9.6376  9.6376  9.6376   [0050] ODESolvers: ODESolvers_Solve in CCTK_EVOL
+ 39.1    9.6376  9.6376  9.6376   CallFunction CCTK_EVOL: ODESolvers::ODESolvers_Solve
+ 37.3    9.1947  9.1947  9.1947   CallScheduleGroup
+ 37.1    9.1270  9.1270  9.1270   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=0]
+ 34.1    8.4009  8.4009  8.4009   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=1]
+ 33.8    8.3300  8.3300  8.3300   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=2]
+ 33.3    8.1988  8.1988  8.1988   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=3]
+ 23.3    5.7498  5.7498  5.7498   [0028] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in CCTK_POSTINITIAL
+ 22.6    5.5561  5.5561  5.5561   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=4]
+ 22.5    5.5463  5.5463  5.5463   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=5]
+ 22.3    5.4809  5.4809  5.4809   apply_boundary_conditions
+ 17.3    4.2695  4.2695  4.2695   [0051] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in ODESolvers_RHS
+ 11.9    2.9296  2.9296  2.9296   InitialiseRegrid [refined]
+  9.2    2.2754  2.2754  2.2754   CallFunction CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+  8.6    2.1243  2.1243  2.1243   [0044] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in CCTK_POSTSTEP
+  4.4    1.0961  1.0961  1.0961   [0029] CanudaX_BSSNMoL: LeanBSSN_add_dissipation in CCTK_POSTINITIAL
+  3.8    0.9443  0.9443  0.9443   [0048] CanudaX_BSSNMoL: LeanBSSN_bssn_constraints in CCTK_ANALYSIS
+  3.8    0.9443  0.9443  0.9443   CallFunction CCTK_ANALYSIS: CanudaX_BSSNMoL::LeanBSSN_bssn_constraints
+  3.5    0.8524  0.8524  0.8524   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=6]
+  3.5    0.8514  0.8514  0.8514   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=7]
+  3.2    0.7866  0.7866  0.7866   [0052] CanudaX_BSSNMoL: LeanBSSN_add_dissipation in ODESolvers_RHS
+  2.5    0.6125  0.6125  0.6125   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_reset_detmetric
+  2.3    0.5708  0.5708  0.5708   Restrict
+  2.3    0.5657  0.5657  0.5657   Restrict::average_down
+  2.3    0.5596  0.5596  0.5596   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+  1.6    0.3928  0.3928  0.3928   [0045] CanudaX_BSSNMoL: LeanBSSN_add_dissipation in CCTK_POSTSTEP
+  1.4    0.3352  0.3352  0.3352   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+  1.3    0.3157  0.3157  0.3157   CallFunction TmunuBaseX_SetTmunuVars: TmunuBaseX::TmunuBaseX_ZeroTmunu
+  1.2    0.2888  0.2888  0.2888   [0023] CanudaX_BSSNMoL: LeanBSSN_reset_detmetric in CCTK_POSTINITIAL
+  1.2    0.2880  0.2880  0.2880   [0018] CanudaX_BSSNMoL: LeanBSSN_gammat in CCTK_INITIAL
+  1.2    0.2879  0.2879  0.2879   CallFunction CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_gammat
+  1.1    0.2809  0.2809  0.2809   [0017] CanudaX_BSSNMoL: LeanBSSN_adm2bssn in CCTK_INITIAL
+  1.1    0.2809  0.2809  0.2809   CallFunction CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_adm2bssn
+  0.9    0.2297  0.2297  0.2297   [0026] CanudaX_BSSNMoL: LeanBSSN_bssn2adm in CCTK_POSTINITIAL
+  0.8    0.2074  0.2074  0.2074   [0055] CanudaX_BSSNMoL: LeanBSSN_reset_detmetric in ODESolvers_PostStep
+  0.7    0.1694  0.1694  0.1694   [0058] CanudaX_BSSNMoL: LeanBSSN_bssn2adm in ODESolvers_PostStep
+  0.6    0.1500  0.1500  0.1500   [0024] CanudaX_BSSNMoL: LeanBSSN_remove_trA in CCTK_POSTINITIAL
+======================================================================
+INFO (CarpetX): OutputGH: iteration 1, time 0.001953, run time 38 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.00195312   Iterations per second: 0.0800115   Simulation time per second: 0.000156272
+INFO (CarpetX): Grid cells: 4.29261e+06   Grid cell updates per second: 343458
+INFO (CarpetX): Performance:
+INFO (CarpetX):   total evolution time:            12.4982 sec
+INFO (CarpetX):   total evolution compute time:    12.4949 sec
+INFO (CarpetX):   total evolution output time:     0.00327396 sec
+INFO (CarpetX):   total iterations:                1
+INFO (CarpetX):   total cells updated:             4.29261e+06
+INFO (CarpetX):   average interations per second: 0.0800115
+INFO (CarpetX):   average cell updates per second: 343458
+INFO (CarpetX): Shutting down...
+INFO (TimerReport): Timer Report before terminating at iteration 1 time 0.00195312
+INFO (TimerReport): Top timers at iteration 1 time 0.00195312
+======================================================================
+    %    Time/s   Min/s   Max/s   Timer (gettimeofday)
+======================================================================
+100.0   24.6330 24.6330 24.6330   Initialise
+ 65.2   16.0706 16.0706 16.0706   Sync
+ 50.7   12.4982 12.4982 12.4982   Evolve
+ 49.3   12.1436 12.1436 12.1436   CallFunction CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+ 39.1    9.6376  9.6376  9.6376   [0050] ODESolvers: ODESolvers_Solve in CCTK_EVOL
+ 39.1    9.6376  9.6376  9.6376   CallFunction CCTK_EVOL: ODESolvers::ODESolvers_Solve
+ 37.3    9.1947  9.1947  9.1947   CallScheduleGroup
+ 37.1    9.1270  9.1270  9.1270   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=0]
+ 34.1    8.4009  8.4009  8.4009   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=1]
+ 33.8    8.3300  8.3300  8.3300   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=2]
+ 33.3    8.1988  8.1988  8.1988   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=3]
+ 23.3    5.7498  5.7498  5.7498   [0028] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in CCTK_POSTINITIAL
+ 22.6    5.5561  5.5561  5.5561   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=4]
+ 22.5    5.5463  5.5463  5.5463   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=5]
+ 22.3    5.4809  5.4809  5.4809   apply_boundary_conditions
+ 17.3    4.2695  4.2695  4.2695   [0051] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in ODESolvers_RHS
+ 11.9    2.9296  2.9296  2.9296   InitialiseRegrid [refined]
+  9.2    2.2754  2.2754  2.2754   CallFunction CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+  8.6    2.1243  2.1243  2.1243   [0044] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in CCTK_POSTSTEP
+  4.4    1.0961  1.0961  1.0961   [0029] CanudaX_BSSNMoL: LeanBSSN_add_dissipation in CCTK_POSTINITIAL
+  3.8    0.9443  0.9443  0.9443   [0048] CanudaX_BSSNMoL: LeanBSSN_bssn_constraints in CCTK_ANALYSIS
+  3.8    0.9443  0.9443  0.9443   CallFunction CCTK_ANALYSIS: CanudaX_BSSNMoL::LeanBSSN_bssn_constraints
+  3.5    0.8524  0.8524  0.8524   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=6]
+  3.5    0.8514  0.8514  0.8514   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=7]
+  3.2    0.7866  0.7866  0.7866   [0052] CanudaX_BSSNMoL: LeanBSSN_add_dissipation in ODESolvers_RHS
+  2.5    0.6125  0.6125  0.6125   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_reset_detmetric
+  2.3    0.5708  0.5708  0.5708   Restrict
+  2.3    0.5657  0.5657  0.5657   Restrict::average_down
+  2.3    0.5596  0.5596  0.5596   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+  1.6    0.3928  0.3928  0.3928   [0045] CanudaX_BSSNMoL: LeanBSSN_add_dissipation in CCTK_POSTSTEP
+  1.4    0.3352  0.3352  0.3352   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+  1.3    0.3157  0.3157  0.3157   CallFunction TmunuBaseX_SetTmunuVars: TmunuBaseX::TmunuBaseX_ZeroTmunu
+  1.2    0.2888  0.2888  0.2888   [0023] CanudaX_BSSNMoL: LeanBSSN_reset_detmetric in CCTK_POSTINITIAL
+  1.2    0.2880  0.2880  0.2880   [0018] CanudaX_BSSNMoL: LeanBSSN_gammat in CCTK_INITIAL
+  1.2    0.2879  0.2879  0.2879   CallFunction CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_gammat
+  1.1    0.2809  0.2809  0.2809   [0017] CanudaX_BSSNMoL: LeanBSSN_adm2bssn in CCTK_INITIAL
+  1.1    0.2809  0.2809  0.2809   CallFunction CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_adm2bssn
+  0.9    0.2297  0.2297  0.2297   [0026] CanudaX_BSSNMoL: LeanBSSN_bssn2adm in CCTK_POSTINITIAL
+  0.8    0.2074  0.2074  0.2074   [0055] CanudaX_BSSNMoL: LeanBSSN_reset_detmetric in ODESolvers_PostStep
+  0.7    0.1694  0.1694  0.1694   [0058] CanudaX_BSSNMoL: LeanBSSN_bssn2adm in ODESolvers_PostStep
+======================================================================
+AMReX (23.08) finalized
+--------------------------------------------------------------------------------
+Done.

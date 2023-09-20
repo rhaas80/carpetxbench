@@ -1,0 +1,2510 @@
+--------------------------------------------------------------------------------
+
+       10                                  
+  1   0101       ************************  
+  01  1010 10      The Cactus Code V4.14.0    
+ 1010 1101 011      www.cactuscode.org     
+  1001 100101    ************************  
+    00010101                               
+     100011     (c) Copyright The Authors  
+      0100      GNU Licensed. No Warranty  
+      0101                                 
+--------------------------------------------------------------------------------
+
+Cactus version:    4.14.0
+Compile date:      Sep 19 2023 (10:26:47)
+Run date:          Sep 19 2023 (16:16:58-0500)
+Run host:          ekohaes8 (pid=3869667)
+Working directory: /data/rhaas/simulations/10
+Executable:        /home/rhaas/postdoc/gr//cactus/CanudaX/exe/cactus_sim
+Parameter file:    /home/rhaas/postdoc/gr//cactus/carpetxbench/parfiles/headon_merger_benchX.par
+--------------------------------------------------------------------------------
+
+Activating thorn Cactus...Success -> active implementation Cactus
+Activation requested for 
+--->ADMBaseX CanudaX_BSSNMoL CarpetX CoordinatesX BoxInBox ODESolvers IOUtil TimerReport TmunuBaseX TwoPunctures<---
+Thorn ADMBaseX requests automatic activation of Loop
+Thorn CarpetX requests automatic activation of AMReX
+Thorn CarpetX requests automatic activation of MPI
+Thorn CarpetX requests automatic activation of yaml_cpp
+Thorn CarpetX requests automatic activation of zlib
+Thorn CarpetX requests automatic activation of Arith
+Thorn CarpetX requests automatic activation of ADIOS2
+Thorn CarpetX requests automatic activation of CUDA
+Thorn CarpetX requests automatic activation of openPMD
+Thorn CarpetX requests automatic activation of Silo
+Thorn TwoPunctures requests automatic activation of GSL
+Thorn ADIOS2 requests automatic activation of CMake
+Thorn Arith requests automatic activation of NSIMD
+Thorn MPI requests automatic activation of hwloc
+Thorn openPMD requests automatic activation of HDF5
+Activating thorn ADIOS2...Success -> active implementation ADIOS2
+Activating thorn ADMBaseX...Success -> active implementation ADMBaseX
+Activating thorn AMReX...Success -> active implementation AMReX
+Activating thorn Arith...Success -> active implementation Arith
+Activating thorn BoxInBox...Success -> active implementation BoxInBox
+Activating thorn CanudaX_BSSNMoL...Success -> active implementation CanudaX_BSSNMoL
+Activating thorn CarpetX...Success -> active implementation CarpetX
+Activating thorn CMake...Success -> active implementation CMake
+Activating thorn CoordinatesX...Success -> active implementation CoordinatesX
+Activating thorn CUDA...Success -> active implementation CUDA
+Activating thorn GSL...Success -> active implementation GSL
+Activating thorn HDF5...Success -> active implementation HDF5
+Activating thorn hwloc...Success -> active implementation hwloc
+Activating thorn IOUtil...Success -> active implementation IO
+Activating thorn Loop...Success -> active implementation Loop
+Activating thorn MPI...Success -> active implementation MPI
+Activating thorn NSIMD...Success -> active implementation NSIMD
+Activating thorn ODESolvers...Success -> active implementation ODESolvers
+Activating thorn openPMD...Success -> active implementation openPMD
+Activating thorn Silo...Success -> active implementation Silo
+Activating thorn TimerReport...Success -> active implementation timerreport
+Activating thorn TmunuBaseX...Success -> active implementation TmunuBaseX
+Activating thorn TwoPunctures...Success -> active implementation TwoPunctures
+Activating thorn yaml_cpp...Success -> active implementation yaml_cpp
+Activating thorn zlib...Success -> active implementation zlib
+--------------------------------------------------------------------------------
+  if (recover initial data)
+    Recover parameters
+  endif
+
+  Startup routines
+    [CCTK_STARTUP]
+      CarpetX::Driver_Startup: Start up the driver
+      IOUtil::IOUtil_Startup: Startup routine
+      GROUP hwloc_startup: hwloc startup group
+        hwloc::hwloc_version: Output hwloc version
+
+  Startup routines which need an existing grid hierarchy
+    [CCTK_WRAGH]
+      Arith::Test_smallvector: [meta] Test small vectors
+      Arith::Test_spvect: [meta] Test sparse vectors
+  Parameter checking routines
+    [CCTK_PARAMCHECK]
+      CanudaX_BSSNMoL::Lean_ParamCheck: Check Lean parameters for consistency
+      TwoPunctures::TwoPunctures_ParamCheck: Check parameters and thorn needs
+
+  Initialisation
+    if (NOT (recover initial data AND recovery_mode is 'strict'))
+      [CCTK_PREREGRIDINITIAL]
+      Set up grid hierarchy
+      [CCTK_POSTREGRIDINITIAL]
+      [CCTK_BASEGRID]
+        CanudaX_BSSNMoL::LeanBSSN_zero: Set everywhere grid functions to zero to prevent spurious nans
+        CanudaX_BSSNMoL::LeanBSSN_zero_constr: Set everywhere constraints grid functions to zero to prevent spurious nans
+        CarpetX::CarpetX_InitError: Initialize regridding error to zero
+        CoordinatesX::CoordinatesX_Setup: Set coordinate grid functions
+        GROUP ODESolvers_BaseGrid: Set up constants (e.g. coordinates) everywhere on the grid
+      [CCTK_INITIAL]
+        GROUP ADMBaseX_InitialData: Schedule group for calculating ADM initial data
+          GROUP TwoPunctures_Group: TwoPunctures initial data group
+            TwoPunctures::TwoPunctures: Create puncture black hole initial data
+            TwoPunctures::TwoPunctures_Metadata: [global] Output TwoPunctures metadata
+        GROUP ADMBaseX_InitialGauge: Schedule group for the ADM initial gauge condition
+          ADMBaseX::ADMBaseX_initial_dtlapse: Set dtlapse to zero
+          ADMBaseX::ADMBaseX_initial_shift: Set shift to zero
+          ADMBaseX::ADMBaseX_initial_dtshift: Set dtshift to zero
+        GROUP ADMBaseX_PostInitial: Schedule group for modifying the ADM initial data, such as e.g. adding noise
+        BoxInBox::BoxInBox_Init: [global] Initialize
+        GROUP CanudaX_BSSNMoL_InitialGroup: CanudaX : initial bin
+          CanudaX_BSSNMoL::LeanBSSN_slicing_condition: Enforces choice of slicing conditions
+          CanudaX_BSSNMoL::LeanBSSN_adm2bssn: [local] Convert initial data into BSSN variables
+          CanudaX_BSSNMoL::LeanBSSN_gammat: [local] Set Gammat initial data
+          CanudaX_BSSNMoL::CanudaX_Sync: [global] Sync BSSN variables
+        GROUP ODESolvers_Initial: Set up initial conditions on interior of state vector
+        GROUP TmunuBaseX_SetTmunuVars: Schedule group for setting T_munu
+          TmunuBaseX::TmunuBaseX_ZeroTmunu: Set T_munu to zero
+          GROUP TmunuBaseX_AddToTmunu: Add to T_munu here
+      [CCTK_POSTINITIAL]
+        BoxInBox::EstimateError: Estimate error
+        GROUP ODESolvers_PostStep: Apply boundary conditions to state vector, and project if necessary
+          GROUP ADMBaseX_SetADMVars: Set ADM variables in this group
+          GROUP ADMBaseX_SetADMRHS: Set ADM RHS variables in this group
+          GROUP CanudaX_BSSNMoL_PostStepGroup: CanudaX : post-step operations
+            CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor: Make sure conformal factor does not drop below specified value
+            CanudaX_BSSNMoL::LeanBSSN_reset_detmetric: reset dethh = 1
+            CanudaX_BSSNMoL::LeanBSSN_remove_trA: Remove trace of A
+            CanudaX_BSSNMoL::CanudaX_Sync: [global] Sync state vector
+            CanudaX_BSSNMoL::LeanBSSN_bssn2adm: [local] Convert variables back to the ADM ones
+          GROUP TmunuBaseX_SetTmunuVars: Schedule group for setting T_munu
+            TmunuBaseX::TmunuBaseX_ZeroTmunu: Set T_munu to zero
+            GROUP TmunuBaseX_AddToTmunu: Add to T_munu here
+        GROUP ODESolvers_RHS: Evaluate RHS for of state vector everywhere on the grid
+          GROUP CanudaX_BSSNMoL_RHSGroup: CanudaX : calculate BSSN RHS
+            CanudaX_BSSNMoL::LeanBSSN_CalcRHS: MoL RHS calculation
+            CanudaX_BSSNMoL::LeanBSSN_add_dissipation: Add KO dissipation
+            CanudaX_BSSNMoL::LeanBSSN_apply_boundary_conditions: Apply radiative boundary conditions 
+        GROUP ODESolvers_EstimateError: Estimate discretization error (for regridding)
+      Initialise finer grids recursively
+      Restrict from finer grids
+      [CCTK_POSTRESTRICTINITIAL]
+      [CCTK_POSTPOSTINITIAL]
+      [CCTK_POSTSTEP]
+        BoxInBox::EstimateError: Estimate error
+        GROUP ODESolvers_PostStep: Apply boundary conditions to state vector, and project if necessary
+          GROUP ADMBaseX_SetADMVars: Set ADM variables in this group
+          GROUP ADMBaseX_SetADMRHS: Set ADM RHS variables in this group
+          GROUP CanudaX_BSSNMoL_PostStepGroup: CanudaX : post-step operations
+            CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor: Make sure conformal factor does not drop below specified value
+            CanudaX_BSSNMoL::LeanBSSN_reset_detmetric: reset dethh = 1
+            CanudaX_BSSNMoL::LeanBSSN_remove_trA: Remove trace of A
+            CanudaX_BSSNMoL::CanudaX_Sync: [global] Sync state vector
+            CanudaX_BSSNMoL::LeanBSSN_bssn2adm: [local] Convert variables back to the ADM ones
+          GROUP TmunuBaseX_SetTmunuVars: Schedule group for setting T_munu
+            TmunuBaseX::TmunuBaseX_ZeroTmunu: Set T_munu to zero
+            GROUP TmunuBaseX_AddToTmunu: Add to T_munu here
+        GROUP ODESolvers_RHS: Evaluate the RHS for of state vector everywhere on the grid
+          GROUP CanudaX_BSSNMoL_RHSGroup: CanudaX : calculate BSSN RHS
+            CanudaX_BSSNMoL::LeanBSSN_CalcRHS: MoL RHS calculation
+            CanudaX_BSSNMoL::LeanBSSN_add_dissipation: Add KO dissipation
+            CanudaX_BSSNMoL::LeanBSSN_apply_boundary_conditions: Apply radiative boundary conditions 
+        GROUP ODESolvers_EstimateError: Estimate discretization error (for regridding)
+    endif
+    if (recover initial data)
+      [CCTK_BASEGRID]
+        CanudaX_BSSNMoL::LeanBSSN_zero: Set everywhere grid functions to zero to prevent spurious nans
+        CanudaX_BSSNMoL::LeanBSSN_zero_constr: Set everywhere constraints grid functions to zero to prevent spurious nans
+        CarpetX::CarpetX_InitError: Initialize regridding error to zero
+        CoordinatesX::CoordinatesX_Setup: Set coordinate grid functions
+        GROUP ODESolvers_BaseGrid: Set up constants (e.g. coordinates) everywhere on the grid
+      [CCTK_RECOVER_VARIABLES]
+      [CCTK_POST_RECOVER_VARIABLES]
+    endif
+    if (checkpoint initial data)
+      [CCTK_CPINITIAL]
+        CarpetX::CarpetX_CheckpointInitial: [meta] Checkpoint initial conditions
+    endif
+    if (analysis)
+      [CCTK_ANALYSIS]
+        CanudaX_BSSNMoL::LeanBSSN_bssn_constraints: Compute constraints
+        GROUP ODESolvers_Analysis: Calculate analysis quantities everywhere
+        TimerReport::zzz_TimerReport_Output: [global] Print the timer report
+  endif
+  Output grid variables
+
+  do loop over timesteps
+    [CCTK_PREREGRID]
+    Change grid hierarchy
+    [CCTK_POSTREGRID]
+      GROUP ODESolvers_PostStep: Apply boundary conditions to state vector, and project if necessary
+        GROUP ADMBaseX_SetADMVars: Set ADM variables in this group
+        GROUP ADMBaseX_SetADMRHS: Set ADM RHS variables in this group
+        GROUP CanudaX_BSSNMoL_PostStepGroup: CanudaX : post-step operations
+          CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor: Make sure conformal factor does not drop below specified value
+          CanudaX_BSSNMoL::LeanBSSN_reset_detmetric: reset dethh = 1
+          CanudaX_BSSNMoL::LeanBSSN_remove_trA: Remove trace of A
+          CanudaX_BSSNMoL::CanudaX_Sync: [global] Sync state vector
+          CanudaX_BSSNMoL::LeanBSSN_bssn2adm: [local] Convert variables back to the ADM ones
+        GROUP TmunuBaseX_SetTmunuVars: Schedule group for setting T_munu
+          TmunuBaseX::TmunuBaseX_ZeroTmunu: Set T_munu to zero
+          GROUP TmunuBaseX_AddToTmunu: Add to T_munu here
+    Rotate timelevels
+    iteration = iteration+1
+    t = t+dt
+    [CCTK_PRESTEP]
+    [CCTK_EVOL]
+      ODESolvers::ODESolvers_Solve: [level] Solve ODEs
+    Evolve finer grids recursively
+    Restrict from finer grids
+    [CCTK_POSTRESTRICT]
+      GROUP ODESolvers_PostStep: Apply boundary conditions to state vector, and project if necessary
+        GROUP ADMBaseX_SetADMVars: Set ADM variables in this group
+        GROUP ADMBaseX_SetADMRHS: Set ADM RHS variables in this group
+        GROUP CanudaX_BSSNMoL_PostStepGroup: CanudaX : post-step operations
+          CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor: Make sure conformal factor does not drop below specified value
+          CanudaX_BSSNMoL::LeanBSSN_reset_detmetric: reset dethh = 1
+          CanudaX_BSSNMoL::LeanBSSN_remove_trA: Remove trace of A
+          CanudaX_BSSNMoL::CanudaX_Sync: [global] Sync state vector
+          CanudaX_BSSNMoL::LeanBSSN_bssn2adm: [local] Convert variables back to the ADM ones
+        GROUP TmunuBaseX_SetTmunuVars: Schedule group for setting T_munu
+          TmunuBaseX::TmunuBaseX_ZeroTmunu: Set T_munu to zero
+          GROUP TmunuBaseX_AddToTmunu: Add to T_munu here
+    [CCTK_POSTSTEP]
+      BoxInBox::EstimateError: Estimate error
+      GROUP ODESolvers_PostStep: Apply boundary conditions to state vector, and project if necessary
+        GROUP ADMBaseX_SetADMVars: Set ADM variables in this group
+        GROUP ADMBaseX_SetADMRHS: Set ADM RHS variables in this group
+        GROUP CanudaX_BSSNMoL_PostStepGroup: CanudaX : post-step operations
+          CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor: Make sure conformal factor does not drop below specified value
+          CanudaX_BSSNMoL::LeanBSSN_reset_detmetric: reset dethh = 1
+          CanudaX_BSSNMoL::LeanBSSN_remove_trA: Remove trace of A
+          CanudaX_BSSNMoL::CanudaX_Sync: [global] Sync state vector
+          CanudaX_BSSNMoL::LeanBSSN_bssn2adm: [local] Convert variables back to the ADM ones
+        GROUP TmunuBaseX_SetTmunuVars: Schedule group for setting T_munu
+          TmunuBaseX::TmunuBaseX_ZeroTmunu: Set T_munu to zero
+          GROUP TmunuBaseX_AddToTmunu: Add to T_munu here
+      GROUP ODESolvers_RHS: Evaluate the RHS for of state vector everywhere on the grid
+        GROUP CanudaX_BSSNMoL_RHSGroup: CanudaX : calculate BSSN RHS
+          CanudaX_BSSNMoL::LeanBSSN_CalcRHS: MoL RHS calculation
+          CanudaX_BSSNMoL::LeanBSSN_add_dissipation: Add KO dissipation
+          CanudaX_BSSNMoL::LeanBSSN_apply_boundary_conditions: Apply radiative boundary conditions 
+      GROUP ODESolvers_EstimateError: Estimate discretization error (for regridding)
+    if (checkpoint)
+      [CCTK_CHECKPOINT]
+      CarpetX::CarpetX_Checkpoint: [meta] Checkpoint
+      TimerReport::zzz_TimerReport_Checkpoint: [global] Print the timer report
+    endif
+    if (analysis)
+      [CCTK_ANALYSIS]
+      CanudaX_BSSNMoL::LeanBSSN_bssn_constraints: Compute constraints
+      GROUP ODESolvers_Analysis: Calculate analysis quantities everywhere
+      TimerReport::zzz_TimerReport_Output: [global] Print the timer report
+    endif
+    Output grid variables
+    enddo
+
+  Termination routines
+    [CCTK_TERMINATE]
+      CarpetX::CarpetX_CheckpointTerminate: [meta] Checkpoint before terminating
+      TimerReport::zzz_TimerReport_Output: [global] Print the timer report
+
+  Shutdown routines
+    [CCTK_SHUTDOWN]
+      CarpetX::Driver_Shutdown: [meta] Shut down the driver
+
+  Routines run after changing the grid hierarchy:
+    [CCTK_POSTREGRID]
+      GROUP ODESolvers_PostStep: Apply boundary conditions to state vector, and project if necessary
+        GROUP ADMBaseX_SetADMVars: Set ADM variables in this group
+        GROUP ADMBaseX_SetADMRHS: Set ADM RHS variables in this group
+        GROUP CanudaX_BSSNMoL_PostStepGroup: CanudaX : post-step operations
+          CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor: Make sure conformal factor does not drop below specified value
+          CanudaX_BSSNMoL::LeanBSSN_reset_detmetric: reset dethh = 1
+          CanudaX_BSSNMoL::LeanBSSN_remove_trA: Remove trace of A
+          CanudaX_BSSNMoL::CanudaX_Sync: [global] Sync state vector
+          CanudaX_BSSNMoL::LeanBSSN_bssn2adm: [local] Convert variables back to the ADM ones
+        GROUP TmunuBaseX_SetTmunuVars: Schedule group for setting T_munu
+          TmunuBaseX::TmunuBaseX_ZeroTmunu: Set T_munu to zero
+          GROUP TmunuBaseX_AddToTmunu: Add to T_munu here
+--------------------------------------------------------------------------------
+INFO (hwloc): library version 2.9.2, API version 0x20800
+--------------------------------------------------------------------------------
+
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [39m  
+  [34m──██──[32m██████[34m──██──[34m──██──[32m██████[34m──██──[34m──██──[32m██████[34m──██──[39m  
+  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [31m██████[31m██████[31m██████[34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m──██──[34m──██──[34m──██──[31m██████[31m██████[31m██████[34m──██──[34m──██──[34m──██──[39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [31m██████[31m██████[31m██████[34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m  ▕▏  [32m██████[34m  ▕▏  [31m██████[31m██████[31m██████[34m  ▕▏  [32m██████[34m  ▕▏  [39m  
+  [34m──██──[32m██████[34m──██──[31m██████[31m██████[31m██████[34m──██──[32m██████[34m──██──[39m  
+  [34m  ▕▏  [32m██████[34m  ▕▏  [31m██████[31m██████[31m██████[34m  ▕▏  [32m██████[34m  ▕▏  [39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [31m██████[31m██████[31m██████[34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m──██──[34m──██──[34m──██──[31m██████[31m██████[31m██████[34m──██──[34m──██──[34m──██──[39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [31m██████[31m██████[31m██████[34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [39m  
+  [34m──██──[32m██████[34m──██──[34m──██──[32m██████[34m──██──[34m──██──[32m██████[34m──██──[39m  
+  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+
+AMR driver provided by CarpetX,
+using AMReX 23.08 (MPI, OpenMP, no accelerators, debug)
+--------------------------------------------------------------------------------
+
+MPI initialized with 1 MPI processes
+MPI initialized with thread support level 2
+OMP initialized with 8 OMP threads
+AMReX (23.08) initialized
+INFO (CarpetX): 
+Symmetries:
+  lower x: none
+  lower y: none
+  lower z: none
+  upper x: none
+  upper y: none
+  upper z: none
+Default boundaries:
+  lower x: neumann
+  lower y: neumann
+  lower z: neumann
+  upper x: neumann
+  upper y: neumann
+  upper z: neumann
+INFO (Arith): Test_smallvector
+INFO (Arith): Test_spvect
+INFO (CarpetX): Setting up initial conditions...
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 2
+INFO (CarpetX): Patch 0:
+INFO (CarpetX):   Grid extent:
+INFO (CarpetX):     gsh=[71,71,71]
+INFO (CarpetX):     blocking_factor=[8,8,8]
+INFO (CarpetX):     max_grid_size=[64,64,64]
+INFO (CarpetX):     max_tile_size=[10000000,32,8]
+INFO (CarpetX):   Domain extent:
+INFO (CarpetX):     xmin=[-256,-256,-256]
+INFO (CarpetX):     xmax=[256,256,256]
+INFO (CarpetX):     base dx=[8,8,8]
+INFO (CarpetX): Initializing level 0...
+INFO (TwoPunctures): Solving puncture equation for BH-BH system
+INFO (TwoPunctures): b = 6
+INFO (TwoPunctures): The two puncture masses are mp=0.80000000000000004 and mm=0.20000000000000001
+INFO (TwoPunctures): Puncture 1 ADM mass is 0.806667
+INFO (TwoPunctures): Puncture 2 ADM mass is 0.206667
+INFO (TwoPunctures): The total ADM mass is 1
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Interpolating result
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   level 0: 1 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 1 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 1
+INFO (CarpetX): Initializing level 1...
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   level 0: 1 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 1 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX):   level 2: 1 boxes, 262144 cells (1.562%, 12%)
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 0.5
+INFO (CarpetX): Initializing level 2...
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   level 0: 1 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 1 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX):   level 2: 1 boxes, 262144 cells (1.562%, 12%)
+INFO (CarpetX):   level 3: 1 boxes, 262144 cells (0.1953%, 12%)
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 0.25
+INFO (CarpetX): Initializing level 3...
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+
+
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   level 0: 1 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 1 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX):   level 2: 1 boxes, 262144 cells (1.562%, 12%)
+INFO (CarpetX):   level 3: 1 boxes, 262144 cells (0.1953%, 12%)
+INFO (CarpetX):   level 4: 1 boxes, 262144 cells (0.02441%, 12%)
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 0.125
+INFO (CarpetX): Initializing level 4...
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): 
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   level 0: 1 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 1 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX):   level 2: 1 boxes, 262144 cells (1.562%, 12%)
+INFO (CarpetX):   level 3: 1 boxes, 262144 cells (0.1953%, 12%)
+INFO (CarpetX):   level 4: 2 boxes, 294912 cells (0.02747%, 14%)
+INFO (CarpetX):   level 5: 2 boxes, 491520 cells (0.005722%, 21%)
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 0.0625
+INFO (CarpetX): Initializing level 5...
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): 
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   level 0: 1 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 1 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX):   level 2: 1 boxes, 262144 cells (1.562%, 12%)
+INFO (CarpetX):   level 3: 1 boxes, 262144 cells (0.1953%, 12%)
+INFO (CarpetX):   level 4: 2 boxes, 294912 cells (0.02747%, 14%)
+INFO (CarpetX):   level 5: 2 boxes, 491520 cells (0.005722%, 21%)
+INFO (CarpetX):   level 6: 3 boxes, 688128 cells (0.001001%, 18%)
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 0.03125
+INFO (CarpetX): Initializing level 6...
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+
+Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   level 0: 1 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 1 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX):   level 2: 1 boxes, 262144 cells (1.562%, 12%)
+INFO (CarpetX):   level 3: 1 boxes, 262144 cells (0.1953%, 12%)
+INFO (CarpetX):   level 4: 2 boxes, 294912 cells (0.02747%, 14%)
+INFO (CarpetX):   level 5: 2 boxes, 491520 cells (0.005722%, 21%)
+INFO (CarpetX):   level 6: 3 boxes, 688128 cells (0.001001%, 18%)
+INFO (CarpetX):   level 7: 4 boxes, 589824 cells (0.0001073%, 11%)
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 0.015625
+INFO (CarpetX): Initializing level 7...
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): 
+
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+
+Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+
+
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+
+
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   level 0: 1 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 1 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX):   level 2: 1 boxes, 262144 cells (1.562%, 12%)
+INFO (CarpetX):   level 3: 1 boxes, 262144 cells (0.1953%, 12%)
+INFO (CarpetX):   level 4: 2 boxes, 294912 cells (0.02747%, 14%)
+INFO (CarpetX):   level 5: 2 boxes, 491520 cells (0.005722%, 21%)
+INFO (CarpetX):   level 6: 3 boxes, 688128 cells (0.001001%, 18%)
+INFO (CarpetX):   level 7: 4 boxes, 589824 cells (0.0001073%, 11%)
+INFO (CarpetX):   level 8: 4 boxes, 589824 cells (1.341e-05%, 12%)
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 0.0078125
+INFO (CarpetX): Initializing level 8...
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): 
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+
+Setting initial lapse to psi^-2.000000 profile.
+
+
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+INFO (TwoPunctures): 
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): 
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): 
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+
+Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   level 0: 1 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 1 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX):   level 2: 1 boxes, 262144 cells (1.562%, 12%)
+INFO (CarpetX):   level 3: 1 boxes, 262144 cells (0.1953%, 12%)
+INFO (CarpetX):   level 4: 2 boxes, 294912 cells (0.02747%, 14%)
+INFO (CarpetX):   level 5: 2 boxes, 491520 cells (0.005722%, 21%)
+INFO (CarpetX):   level 6: 3 boxes, 688128 cells (0.001001%, 18%)
+INFO (CarpetX):   level 7: 4 boxes, 589824 cells (0.0001073%, 11%)
+INFO (CarpetX):   level 8: 4 boxes, 589824 cells (1.341e-05%, 12%)
+INFO (CarpetX):   level 9: 2 boxes, 294912 cells (8.382e-07%, 6%)
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 0.00390625
+INFO (CarpetX): Initializing level 9...
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): 
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+
+
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): 
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+INFO (TwoPunctures): 
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+
+
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): 
+
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   level 0: 1 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 1 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX):   level 2: 1 boxes, 262144 cells (1.562%, 12%)
+INFO (CarpetX):   level 3: 1 boxes, 262144 cells (0.1953%, 12%)
+INFO (CarpetX):   level 4: 2 boxes, 294912 cells (0.02747%, 14%)
+INFO (CarpetX):   level 5: 2 boxes, 491520 cells (0.005722%, 21%)
+INFO (CarpetX):   level 6: 3 boxes, 688128 cells (0.001001%, 18%)
+INFO (CarpetX):   level 7: 4 boxes, 589824 cells (0.0001073%, 11%)
+INFO (CarpetX):   level 8: 4 boxes, 589824 cells (1.341e-05%, 12%)
+INFO (CarpetX):   level 9: 2 boxes, 294912 cells (8.382e-07%, 6%)
+INFO (CarpetX):   level 10: 2 boxes, 294912 cells (1.048e-07%, 12%)
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 0.00195312
+INFO (CarpetX): Initializing level 10...
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+
+Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.
+
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+
+
+INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.
+INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): INFO (TwoPunctures): Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.INFO (TwoPunctures): 
+
+Setting initial lapse to psi^-2.000000 profile.
+Setting initial lapse to psi^-2.000000 profile.Setting initial lapse to psi^-2.000000 profile.
+
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   level 0: 1 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 1 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX):   level 2: 1 boxes, 262144 cells (1.562%, 12%)
+INFO (CarpetX):   level 3: 1 boxes, 262144 cells (0.1953%, 12%)
+INFO (CarpetX):   level 4: 2 boxes, 294912 cells (0.02747%, 14%)
+INFO (CarpetX):   level 5: 2 boxes, 491520 cells (0.005722%, 21%)
+INFO (CarpetX):   level 6: 3 boxes, 688128 cells (0.001001%, 18%)
+INFO (CarpetX):   level 7: 4 boxes, 589824 cells (0.0001073%, 11%)
+INFO (CarpetX):   level 8: 4 boxes, 589824 cells (1.341e-05%, 12%)
+INFO (CarpetX):   level 9: 2 boxes, 294912 cells (8.382e-07%, 6%)
+INFO (CarpetX):   level 10: 2 boxes, 294912 cells (1.048e-07%, 12%)
+INFO (CarpetX): Initialized 11 levels
+INFO (TimerReport): Timer Report at iteration 0 time 0
+INFO (TimerReport): Top timers at iteration 0 time 0
+======================================================================
+    %    Time/s   Min/s   Max/s   Timer (gettimeofday)
+======================================================================
+100.0   10.9135 10.9135 10.9135   Sync
+ 88.1    9.6195  9.6195  9.6195   CallFunction CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+ 74.4    8.1247  8.1247  8.1247   [0029] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in CCTK_POSTINITIAL
+ 73.9    8.0661  8.0661  8.0661   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=1]
+ 72.6    7.9201  7.9201  7.9201   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=2]
+ 70.2    7.6627  7.6627  7.6627   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=0]
+ 65.1    7.1064  7.1064  7.1064   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=3]
+ 51.0    5.5704  5.5704  5.5704   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=4]
+ 46.2    5.0380  5.0380  5.0380   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=5]
+ 30.2    3.2963  3.2963  3.2963   InitialiseRegrid [refined]
+ 27.5    3.0066  3.0066  3.0066   CallFunction CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+ 23.3    2.5469  2.5469  2.5469   [0030] CanudaX_BSSNMoL: LeanBSSN_add_dissipation in CCTK_POSTINITIAL
+ 22.2    2.4237  2.4237  2.4237   [0011] TwoPunctures: TwoPunctures in CCTK_INITIAL
+ 22.2    2.4237  2.4237  2.4237   CallFunction TwoPunctures_Group: TwoPunctures::TwoPunctures
+ 13.7    1.4949  1.4949  1.4949   [0045] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in CCTK_POSTSTEP
+ 11.5    1.2553  1.2553  1.2553   apply_boundary_conditions
+  6.7    0.7331  0.7331  0.7331   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=7]
+  6.7    0.7263  0.7263  0.7263   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=6]
+  6.5    0.7140  0.7140  0.7140   [0049] CanudaX_BSSNMoL: LeanBSSN_bssn_constraints in CCTK_ANALYSIS
+  6.5    0.7140  0.7140  0.7140   CallFunction CCTK_ANALYSIS: CanudaX_BSSNMoL::LeanBSSN_bssn_constraints
+  4.6    0.4971  0.4971  0.4971   [0019] CanudaX_BSSNMoL: LeanBSSN_gammat in CCTK_INITIAL
+  4.6    0.4970  0.4970  0.4970   CallFunction CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_gammat
+  4.2    0.4598  0.4598  0.4598   [0046] CanudaX_BSSNMoL: LeanBSSN_add_dissipation in CCTK_POSTSTEP
+  4.1    0.4493  0.4493  0.4493   Restrict
+  4.1    0.4443  0.4443  0.4443   Restrict::average_down
+  3.9    0.4257  0.4257  0.4257   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+  3.5    0.3803  0.3803  0.3803   [0018] CanudaX_BSSNMoL: LeanBSSN_adm2bssn in CCTK_INITIAL
+  3.5    0.3802  0.3802  0.3802   CallFunction CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_adm2bssn
+  3.2    0.3472  0.3472  0.3472   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_reset_detmetric
+  2.6    0.2861  0.2861  0.2861   [0024] CanudaX_BSSNMoL: LeanBSSN_reset_detmetric in CCTK_POSTINITIAL
+  2.6    0.2785  0.2785  0.2785   [0027] CanudaX_BSSNMoL: LeanBSSN_bssn2adm in CCTK_POSTINITIAL
+  2.5    0.2741  0.2741  0.2741   CallFunction TmunuBaseX_SetTmunuVars: TmunuBaseX::TmunuBaseX_ZeroTmunu
+  1.9    0.2067  0.2067  0.2067   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+  1.4    0.1551  0.1551  0.1551   [0025] CanudaX_BSSNMoL: LeanBSSN_remove_trA in CCTK_POSTINITIAL
+  1.4    0.1516  0.1516  0.1516   [0007] CanudaX_BSSNMoL: LeanBSSN_zero in CCTK_BASEGRID
+  1.4    0.1515  0.1515  0.1515   CallFunction CCTK_BASEGRID: CanudaX_BSSNMoL::LeanBSSN_zero
+  0.9    0.1013  0.1013  0.1013   [0021] TmunuBaseX: TmunuBaseX_ZeroTmunu in CCTK_INITIAL
+  0.9    0.0987  0.0987  0.0987   [0028] TmunuBaseX: TmunuBaseX_ZeroTmunu in CCTK_POSTINITIAL
+  0.9    0.0972  0.0972  0.0972   [0036] CanudaX_BSSNMoL: LeanBSSN_bssn2adm in CCTK_POSTREGRID
+  0.7    0.0746  0.0746  0.0746   [0022] BoxInBox: EstimateError in CCTK_POSTINITIAL
+======================================================================
+INFO (CarpetX): OutputGH: iteration 0, time 0.000000, run time 32 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Starting evolution...
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   old levels 11, new levels 11
+INFO (CarpetX):   level 0: 1 boxes, 262144 cells (100%)
+INFO (CarpetX):   level 1: 1 boxes, 262144 cells (12.5%, 12%)
+INFO (CarpetX):   level 2: 1 boxes, 262144 cells (1.562%, 12%)
+INFO (CarpetX):   level 3: 1 boxes, 262144 cells (0.1953%, 12%)
+INFO (CarpetX):   level 4: 2 boxes, 294912 cells (0.02747%, 14%)
+INFO (CarpetX):   level 5: 2 boxes, 491520 cells (0.005722%, 21%)
+INFO (CarpetX):   level 6: 3 boxes, 688128 cells (0.001001%, 18%)
+INFO (CarpetX):   level 7: 4 boxes, 589824 cells (0.0001073%, 11%)
+INFO (CarpetX):   level 8: 4 boxes, 589824 cells (1.341e-05%, 12%)
+INFO (CarpetX):   level 9: 2 boxes, 294912 cells (8.382e-07%, 6%)
+INFO (CarpetX):   level 10: 2 boxes, 294912 cells (1.048e-07%, 12%)
+INFO (ODESolvers): Integrator is RK4
+INFO (CarpetX): OutputGH: iteration 1, time 0.001953, run time 49 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.00195312   Iterations per second: 0.0605076   Simulation time per second: 0.000118179
+INFO (CarpetX): Grid cells: 4.29261e+06   Grid cell updates per second: 259736
+INFO (CarpetX): Performance:
+INFO (CarpetX):   total evolution time:            16.5268 sec
+INFO (CarpetX):   total evolution compute time:    16.5268 sec
+INFO (CarpetX):   total evolution output time:     6.91414e-06 sec
+INFO (CarpetX):   total iterations:                1
+INFO (CarpetX):   total cells updated:             4.29261e+06
+INFO (CarpetX):   average interations per second: 0.0605076
+INFO (CarpetX):   average cell updates per second: 259736
+INFO (CarpetX): OutputGH: iteration 2, time 0.003906, run time 66 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.00390625   Iterations per second: 0.0571167   Simulation time per second: 0.000111556
+INFO (CarpetX): Grid cells: 4.29261e+06   Grid cell updates per second: 245179
+INFO (CarpetX): Performance:
+INFO (CarpetX):   total evolution time:            34.0349 sec
+INFO (CarpetX):   total evolution compute time:    34.0348 sec
+INFO (CarpetX):   total evolution output time:     1.38283e-05 sec
+INFO (CarpetX):   total iterations:                2
+INFO (CarpetX):   total cells updated:             8.58522e+06
+INFO (CarpetX):   average interations per second: 0.0587633
+INFO (CarpetX):   average cell updates per second: 252248
+INFO (CarpetX): OutputGH: iteration 3, time 0.005859, run time 84 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.00585938   Iterations per second: 0.056468   Simulation time per second: 0.000110289
+INFO (CarpetX): Grid cells: 4.29261e+06   Grid cell updates per second: 242395
+INFO (CarpetX): Performance:
+INFO (CarpetX):   total evolution time:            51.744 sec
+INFO (CarpetX):   total evolution compute time:    51.744 sec
+INFO (CarpetX):   total evolution output time:     2.19345e-05 sec
+INFO (CarpetX):   total iterations:                3
+INFO (CarpetX):   total cells updated:             1.28778e+07
+INFO (CarpetX):   average interations per second: 0.0579777
+INFO (CarpetX):   average cell updates per second: 248876
+INFO (CarpetX): OutputGH: iteration 4, time 0.007812, run time 101 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.0078125   Iterations per second: 0.0564298   Simulation time per second: 0.000110214
+INFO (CarpetX): Grid cells: 4.29261e+06   Grid cell updates per second: 242231
+INFO (CarpetX): Performance:
+INFO (CarpetX):   total evolution time:            69.4651 sec
+INFO (CarpetX):   total evolution compute time:    69.4651 sec
+INFO (CarpetX):   total evolution output time:     2.88486e-05 sec
+INFO (CarpetX):   total iterations:                4
+INFO (CarpetX):   total cells updated:             1.71704e+07
+INFO (CarpetX):   average interations per second: 0.0575828
+INFO (CarpetX):   average cell updates per second: 247181
+INFO (CarpetX): OutputGH: iteration 5, time 0.009766, run time 119 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.00976562   Iterations per second: 0.0564665   Simulation time per second: 0.000110286
+INFO (CarpetX): Grid cells: 4.29261e+06   Grid cell updates per second: 242388
+INFO (CarpetX): Performance:
+INFO (CarpetX):   total evolution time:            87.1748 sec
+INFO (CarpetX):   total evolution compute time:    87.1747 sec
+INFO (CarpetX):   total evolution output time:     3.57628e-05 sec
+INFO (CarpetX):   total iterations:                5
+INFO (CarpetX):   total cells updated:             2.1463e+07
+INFO (CarpetX):   average interations per second: 0.0573561
+INFO (CarpetX):   average cell updates per second: 246207
+INFO (CarpetX): OutputGH: iteration 6, time 0.011719, run time 137 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.0117188   Iterations per second: 0.0565484   Simulation time per second: 0.000110446
+INFO (CarpetX): Grid cells: 4.29261e+06   Grid cell updates per second: 242740
+INFO (CarpetX): Performance:
+INFO (CarpetX):   total evolution time:            104.859 sec
+INFO (CarpetX):   total evolution compute time:    104.859 sec
+INFO (CarpetX):   total evolution output time:     4.3869e-05 sec
+INFO (CarpetX):   total iterations:                6
+INFO (CarpetX):   total cells updated:             2.57556e+07
+INFO (CarpetX):   average interations per second: 0.0572198
+INFO (CarpetX):   average cell updates per second: 245622
+INFO (CarpetX): OutputGH: iteration 7, time 0.013672, run time 154 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.0136719   Iterations per second: 0.0566468   Simulation time per second: 0.000110638
+INFO (CarpetX): Grid cells: 4.29261e+06   Grid cell updates per second: 243162
+INFO (CarpetX): Performance:
+INFO (CarpetX):   total evolution time:            122.512 sec
+INFO (CarpetX):   total evolution compute time:    122.512 sec
+INFO (CarpetX):   total evolution output time:     5.10216e-05 sec
+INFO (CarpetX):   total iterations:                7
+INFO (CarpetX):   total cells updated:             3.00483e+07
+INFO (CarpetX):   average interations per second: 0.0571373
+INFO (CarpetX):   average cell updates per second: 245268
+INFO (TimerReport): Timer Report at iteration 8 time 0.015625
+INFO (TimerReport): Top timers at iteration 8 time 0.015625
+======================================================================
+    %    Time/s   Min/s   Max/s   Timer (gettimeofday)
+======================================================================
+100.0   107.227 107.227 107.227   [0051] ODESolvers: ODESolvers_Solve in CCTK_EVOL
+100.0   107.227 107.227 107.227   CallFunction CCTK_EVOL: ODESolvers::ODESolvers_Solve
+ 96.8   103.765 103.765 103.765   CallScheduleGroup
+ 69.8    74.857  74.857  74.857   CallFunction CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+ 48.7    52.171  52.171  52.171   [0052] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in ODESolvers_RHS
+ 48.1    51.555  51.555  51.555   Sync
+ 34.8    37.281  37.281  37.281   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=1]
+ 34.3    36.788  36.788  36.788   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=3]
+ 32.8    35.169  35.169  35.169   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=2]
+ 29.5    31.586  31.586  31.586   Initialise
+ 28.1    30.154  30.154  30.154   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=0]
+ 23.5    25.192  25.192  25.192   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=5]
+ 21.9    23.514  23.514  23.514   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=4]
+ 20.1    21.579  21.579  21.579   CallFunction CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+ 13.9    14.855  14.855  14.855   [0053] CanudaX_BSSNMoL: LeanBSSN_add_dissipation in ODESolvers_RHS
+ 13.6    14.562  14.562  14.562   [0045] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in CCTK_POSTSTEP
+  7.6     8.125   8.125   8.125   [0029] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in CCTK_POSTINITIAL
+  6.5     6.931   6.931   6.931   [0049] CanudaX_BSSNMoL: LeanBSSN_bssn_constraints in CCTK_ANALYSIS
+  6.5     6.931   6.931   6.931   CallFunction CCTK_ANALYSIS: CanudaX_BSSNMoL::LeanBSSN_bssn_constraints
+  4.3     4.620   4.620   4.620   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=7]
+  4.3     4.615   4.615   4.615   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=6]
+  3.9     4.178   4.178   4.178   [0046] CanudaX_BSSNMoL: LeanBSSN_add_dissipation in CCTK_POSTSTEP
+  3.5     3.791   3.791   3.791   apply_boundary_conditions
+  3.1     3.296   3.296   3.296   InitialiseRegrid [refined]
+  2.4     2.547   2.547   2.547   [0030] CanudaX_BSSNMoL: LeanBSSN_add_dissipation in CCTK_POSTINITIAL
+  2.3     2.454   2.454   2.454   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+  2.3     2.424   2.424   2.424   [0011] TwoPunctures: TwoPunctures in CCTK_INITIAL
+  2.3     2.424   2.424   2.424   CallFunction TwoPunctures_Group: TwoPunctures::TwoPunctures
+  2.2     2.327   2.327   2.327   Restrict
+  2.1     2.303   2.303   2.303   Restrict::average_down
+  1.9     2.072   2.072   2.072   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_reset_detmetric
+  1.5     1.622   1.622   1.622   [0059] CanudaX_BSSNMoL: LeanBSSN_bssn2adm in ODESolvers_PostStep
+  1.3     1.385   1.385   1.385   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+  1.3     1.366   1.366   1.366   [0056] CanudaX_BSSNMoL: LeanBSSN_reset_detmetric in ODESolvers_PostStep
+  0.9     1.004   1.004   1.004   CallFunction TmunuBaseX_SetTmunuVars: TmunuBaseX::TmunuBaseX_ZeroTmunu
+  0.9     0.942   0.942   0.942   [0057] CanudaX_BSSNMoL: LeanBSSN_remove_trA in ODESolvers_PostStep
+  0.5     0.584   0.584   0.584   [0060] TmunuBaseX: TmunuBaseX_ZeroTmunu in ODESolvers_PostStep
+  0.5     0.497   0.497   0.497   [0019] CanudaX_BSSNMoL: LeanBSSN_gammat in CCTK_INITIAL
+  0.5     0.497   0.497   0.497   CallFunction CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_gammat
+  0.4     0.456   0.456   0.456   [0043] CanudaX_BSSNMoL: LeanBSSN_bssn2adm in CCTK_POSTSTEP
+======================================================================
+INFO (CarpetX): OutputGH: iteration 8, time 0.015625, run time 172 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.015625   Iterations per second: 0.0567815   Simulation time per second: 0.000110901
+INFO (CarpetX): Grid cells: 4.29261e+06   Grid cell updates per second: 243741
+INFO (CarpetX): Performance:
+INFO (CarpetX):   total evolution time:            140.123 sec
+INFO (CarpetX):   total evolution compute time:    140.12 sec
+INFO (CarpetX):   total evolution output time:     0.003263 sec
+INFO (CarpetX):   total iterations:                8
+INFO (CarpetX):   total cells updated:             3.43409e+07
+INFO (CarpetX):   average interations per second: 0.0570925
+INFO (CarpetX):   average cell updates per second: 245076
+INFO (CarpetX): Shutting down...
+INFO (TimerReport): Timer Report before terminating at iteration 8 time 0.015625
+INFO (TimerReport): Top timers at iteration 8 time 0.015625
+======================================================================
+    %    Time/s   Min/s   Max/s   Timer (gettimeofday)
+======================================================================
+100.0   140.124 140.124 140.124   Evolve
+ 76.5   107.227 107.227 107.227   [0051] ODESolvers: ODESolvers_Solve in CCTK_EVOL
+ 76.5   107.227 107.227 107.227   CallFunction CCTK_EVOL: ODESolvers::ODESolvers_Solve
+ 74.1   103.765 103.765 103.765   CallScheduleGroup
+ 53.4    74.857  74.857  74.857   CallFunction CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+ 37.2    52.171  52.171  52.171   [0052] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in ODESolvers_RHS
+ 36.8    51.555  51.555  51.555   Sync
+ 26.6    37.281  37.281  37.281   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=1]
+ 26.3    36.788  36.788  36.788   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=3]
+ 25.1    35.169  35.169  35.169   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=2]
+ 22.5    31.586  31.586  31.586   Initialise
+ 21.5    30.154  30.154  30.154   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=0]
+ 18.0    25.192  25.192  25.192   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=5]
+ 16.8    23.514  23.514  23.514   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=4]
+ 15.4    21.579  21.579  21.579   CallFunction CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_add_dissipation
+ 10.6    14.855  14.855  14.855   [0053] CanudaX_BSSNMoL: LeanBSSN_add_dissipation in ODESolvers_RHS
+ 10.4    14.562  14.562  14.562   [0045] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in CCTK_POSTSTEP
+  5.8     8.125   8.125   8.125   [0029] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in CCTK_POSTINITIAL
+  4.9     6.931   6.931   6.931   [0049] CanudaX_BSSNMoL: LeanBSSN_bssn_constraints in CCTK_ANALYSIS
+  4.9     6.931   6.931   6.931   CallFunction CCTK_ANALYSIS: CanudaX_BSSNMoL::LeanBSSN_bssn_constraints
+  3.3     4.620   4.620   4.620   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=7]
+  3.3     4.615   4.615   4.615   prolongate_3d_rf2<[vertex,vertex,vertex],[poly,poly,poly],[5,5,5,none]>[thread=6]
+  3.0     4.178   4.178   4.178   [0046] CanudaX_BSSNMoL: LeanBSSN_add_dissipation in CCTK_POSTSTEP
+  2.7     3.791   3.791   3.791   apply_boundary_conditions
+  2.4     3.296   3.296   3.296   InitialiseRegrid [refined]
+  1.8     2.547   2.547   2.547   [0030] CanudaX_BSSNMoL: LeanBSSN_add_dissipation in CCTK_POSTINITIAL
+  1.8     2.454   2.454   2.454   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+  1.7     2.424   2.424   2.424   [0011] TwoPunctures: TwoPunctures in CCTK_INITIAL
+  1.7     2.424   2.424   2.424   CallFunction TwoPunctures_Group: TwoPunctures::TwoPunctures
+  1.7     2.327   2.327   2.327   Restrict
+  1.6     2.303   2.303   2.303   Restrict::average_down
+  1.5     2.072   2.072   2.072   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_reset_detmetric
+  1.2     1.622   1.622   1.622   [0059] CanudaX_BSSNMoL: LeanBSSN_bssn2adm in ODESolvers_PostStep
+  1.0     1.385   1.385   1.385   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+  1.0     1.366   1.366   1.366   [0056] CanudaX_BSSNMoL: LeanBSSN_reset_detmetric in ODESolvers_PostStep
+  0.7     1.004   1.004   1.004   CallFunction TmunuBaseX_SetTmunuVars: TmunuBaseX::TmunuBaseX_ZeroTmunu
+  0.7     0.942   0.942   0.942   [0057] CanudaX_BSSNMoL: LeanBSSN_remove_trA in ODESolvers_PostStep
+  0.4     0.584   0.584   0.584   [0060] TmunuBaseX: TmunuBaseX_ZeroTmunu in ODESolvers_PostStep
+  0.4     0.497   0.497   0.497   [0019] CanudaX_BSSNMoL: LeanBSSN_gammat in CCTK_INITIAL
+  0.4     0.497   0.497   0.497   CallFunction CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_gammat
+======================================================================
+AMReX (23.08) finalized
+--------------------------------------------------------------------------------
+Done.

@@ -79,7 +79,7 @@ Carpet::use_buffer_zones = yes
 
 #Carpet::time_refinement_factors = "[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]"
 Time::timestep_method = "given"
-Time::dtfac = 0.25 * CoordBase::dx #/2**(Carpet::max_refinement_levels-1)
+Time::timestep = 0.25 * CoordBase::dx #/2**(Carpet::max_refinement_levels-1)
 
 CarpetRegrid2::num_centres = 3
 

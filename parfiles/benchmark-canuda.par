@@ -1,0 +1,129 @@
+ActiveThorns = "
+    ADMBase
+    Boundary
+    Carpet
+    CarpetLib
+    CarpetRegrid2
+    CartGrid3D
+    CoordBase
+    CoordGauge
+    Formaline
+    IOUtil
+    InitBase
+    LeanBSSNMoL
+    MoL
+    NewRad
+    ReflectionSymmetry
+    StaticConformal
+    SymBase
+    SystemTopology
+    Time
+    TimerReport
+    TmunuBase
+"
+
+$nlevels = 1   #TODO 8
+$ncells_x = 512   #TODO 128
+$ncells_y = 512   #TODO 128
+$ncells_z = 512   #TODO 128
+
+Carpet::verbose = no
+Cactus::cctk_show_schedule = no
+Carpet::poison_new_timelevels = no
+
+Cactus::presync_mode = "off"
+
+Cactus::terminate = "iteration"
+Cactus::cctk_itlast = 10
+
+Carpet::domain_from_coordbase = yes
+CartGrid3D::type = "coordbase"
+CoordBase::domainsize = "minmax"
+CoordBase::spacing = "numcells"
+
+CoordBase::xmin = 0.0
+CoordBase::ymin = 0.0
+CoordBase::zmin = 0.0
+
+CoordBase::xmax = 1.0
+CoordBase::ymax = 1.0
+CoordBase::zmax = 1.0
+
+CoordBase::ncells_x = $ncells_x
+CoordBase::ncells_y = $ncells_y
+CoordBase::ncells_z = $ncells_z
+
+CoordBase::boundary_size_x_lower = 3
+CoordBase::boundary_size_y_lower = 3
+CoordBase::boundary_size_z_lower = 3
+CoordBase::boundary_size_x_upper = 3
+CoordBase::boundary_size_y_upper = 3
+CoordBase::boundary_size_z_upper = 3
+
+CoordBase::boundary_shiftout_x_lower = 1
+CoordBase::boundary_shiftout_y_lower = 1
+CoordBase::boundary_shiftout_z_lower = 1
+CoordBase::boundary_shiftout_x_upper = 1
+CoordBase::boundary_shiftout_y_upper = 1
+CoordBase::boundary_shiftout_z_upper = 1
+
+ReflectionSymmetry::reflection_x = yes
+ReflectionSymmetry::reflection_y = yes
+ReflectionSymmetry::reflection_z = yes
+
+ReflectionSymmetry::avoid_origin_x = no
+ReflectionSymmetry::avoid_origin_y = no
+ReflectionSymmetry::avoid_origin_z = no
+
+Carpet::max_refinement_levels = $nlevels
+CarpetRegrid2::regrid_every = 0
+
+# TODO: Implement box-in-box
+# CarpetRegrid2::... = ...
+
+Carpet::prolongation_order_space = 3
+Carpet::prolongation_order_time = 1
+
+Carpet::ghost_size = 3
+
+MoL::ODE_Method = "RK4"
+MoL::MoL_Intermediate_Steps = 4
+MoL::MoL_Num_Scratch_Levels = 1
+Time::dtfac = 0.5
+
+InitBase::initial_data_setup_method = "init_all_levels"
+
+ADMBase::initial_data = "Cartesian Minkowski"
+ADMBase::initial_lapse = "one"
+ADMBase::initial_shift = "zero"
+ADMBase::initial_dtlapse = "zero"
+ADMBase::initial_dtshift = "zero"
+
+ADMBase::lapse_timelevels = 2
+ADMBase::shift_timelevels = 2
+ADMBase::metric_timelevels = 2
+
+ADMBase::evolution_method = "LeanBSSNMoL"
+ADMBase::lapse_evolution_method = "LeanBSSNMoL"
+ADMBase::shift_evolution_method = "LeanBSSNMoL"
+ADMBase::dtlapse_evolution_method = "LeanBSSNMoL"
+ADMBase::dtshift_evolution_method = "LeanBSSNMoL"
+
+LeanBSSNMoL::impose_conf_fac_floor_at_initial  = yes
+LeanBSSNMoL::eta_beta = 1
+LeanBSSNMoL::conf_fac_floor = 1.0e-4
+LeanBSSNMoL::derivs_order = 4
+LeanBSSNMoL::use_advection_stencils = yes
+LeanBSSNMoL::calculate_constraints = yes
+
+IO::out_dir = $parfile
+IO::out_every = 0
+Carpet::out_performance_every = 1
+
+TimerReport::out_every = 10
+TimerReport::out_filename = "TimerReport"
+TimerReport::output_all_timers = no
+TimerReport::output_all_timers_readable = no
+TimerReport::output_all_timers_together = no
+TimerReport::output_schedule_timers = no
+TimerReport::n_top_timers = 50

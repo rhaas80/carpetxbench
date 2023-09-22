@@ -2,7 +2,9 @@ ActiveThorns = "
     ADMBase
     Boundary
     Carpet
+    CarpetIOBasic
     CarpetLib
+    CarpetReduce
     CarpetRegrid2
     CartGrid3D
     CoordBase
@@ -16,16 +18,16 @@ ActiveThorns = "
     ReflectionSymmetry
     StaticConformal
     SymBase
-    SystemTopology
+    #SystemTopology
     Time
     TimerReport
     TmunuBase
 "
 
 $nlevels = 1   #TODO 8
-$ncells_x = 512   #TODO 128
-$ncells_y = 512   #TODO 128
-$ncells_z = 512   #TODO 128
+$ncells_x = 512/2   #TODO 128
+$ncells_y = 512/2   #TODO 128
+$ncells_z = 512/2   #TODO 128
 
 Carpet::verbose = no
 Cactus::cctk_show_schedule = no
@@ -118,7 +120,16 @@ LeanBSSNMoL::calculate_constraints = yes
 
 IO::out_dir = $parfile
 IO::out_every = 0
-Carpet::out_performance_every = 1
+#Carpet::out_performance_every = 1
+
+IOBasic::outInfo_every      = 1
+IOBasic::outInfo_reductions = "maximum"
+IOBasic::real_min = 1.0
+IOBasic::outInfo_vars       = "
+        Carpet::physical_time_per_hour
+        Carpet::time_evolution
+        Carpet::evolution_steps_count
+"
 
 TimerReport::out_every = 10
 TimerReport::out_filename = "TimerReport"

@@ -1,0 +1,436 @@
+--------------------------------------------------------------------------------
+
+       10                                  
+  1   0101       ************************  
+  01  1010 10      The Cactus Code V4.14.0    
+ 1010 1101 011      www.cactuscode.org     
+  1001 100101    ************************  
+    00010101                               
+     100011     (c) Copyright The Authors  
+      0100      GNU Licensed. No Warranty  
+      0101                                 
+--------------------------------------------------------------------------------
+
+Cactus version:    4.14.0
+Compile date:      Sep 22 2023 (09:07:45)
+Run date:          Sep 22 2023 (09:09:51-0500)
+Run host:          ekohaes8 (pid=4039538)
+Working directory: /data/rhaas/simulations/02
+Executable:        /home/rhaas/postdoc/gr/cactus/CanudaX/exe/cactus_sim
+Parameter file:    /home/rhaas/postdoc/gr/cactus/carpetxbench/parfiles/benchmark-canudax.par
+--------------------------------------------------------------------------------
+
+Activating thorn Cactus...Success -> active implementation Cactus
+Activation requested for 
+--->ADMBaseX CanudaX_BSSNMoL CarpetX ErrorEstimator Formaline IOUtil ODESolvers TimerReport TmunuBaseX<---
+Thorn ADMBaseX requests automatic activation of Loop
+Thorn CarpetX requests automatic activation of AMReX
+Thorn CarpetX requests automatic activation of MPI
+Thorn CarpetX requests automatic activation of yaml_cpp
+Thorn CarpetX requests automatic activation of zlib
+Thorn CarpetX requests automatic activation of Arith
+Thorn CarpetX requests automatic activation of ADIOS2
+Thorn CarpetX requests automatic activation of CUDA
+Thorn CarpetX requests automatic activation of openPMD
+Thorn CarpetX requests automatic activation of Silo
+Thorn ADIOS2 requests automatic activation of CMake
+Thorn Arith requests automatic activation of NSIMD
+Thorn MPI requests automatic activation of hwloc
+Thorn openPMD requests automatic activation of HDF5
+Activating thorn ADIOS2...Success -> active implementation ADIOS2
+Activating thorn ADMBaseX...Success -> active implementation ADMBaseX
+Activating thorn AMReX...Success -> active implementation AMReX
+Activating thorn Arith...Success -> active implementation Arith
+Activating thorn CanudaX_BSSNMoL...Success -> active implementation CanudaX_BSSNMoL
+Activating thorn CarpetX...Success -> active implementation CarpetX
+Activating thorn CMake...Success -> active implementation CMake
+Activating thorn CUDA...Success -> active implementation CUDA
+Activating thorn ErrorEstimator...Success -> active implementation ErrorEstimator
+Activating thorn Formaline...Success -> active implementation Formaline
+Activating thorn HDF5...Success -> active implementation HDF5
+Activating thorn hwloc...Success -> active implementation hwloc
+Activating thorn IOUtil...Success -> active implementation IO
+Activating thorn Loop...Success -> active implementation Loop
+Activating thorn MPI...Success -> active implementation MPI
+Activating thorn NSIMD...Success -> active implementation NSIMD
+Activating thorn ODESolvers...Success -> active implementation ODESolvers
+Activating thorn openPMD...Success -> active implementation openPMD
+Activating thorn Silo...Success -> active implementation Silo
+Activating thorn TimerReport...Success -> active implementation timerreport
+Activating thorn TmunuBaseX...Success -> active implementation TmunuBaseX
+Activating thorn yaml_cpp...Success -> active implementation yaml_cpp
+Activating thorn zlib...Success -> active implementation zlib
+INFO (Formaline): Configuration id: config-sim-ekohaes8.ncsa.illinois.edu-data-rhaas-postdoc-gr-cactus-CanudaX
+INFO (Formaline): Build id: build-sim-ekohaes8.ncsa.illinois.edu-rhaas-2023.09.22-14.07.35-4038959
+INFO (Formaline): Simulation id: run-benchmark-canudax-ekohaes8-rhaas-2023.09.22-14.09.51-4039538
+INFO (Formaline): Run id: run-benchmark-canudax-ekohaes8-rhaas-2023.09.22-14.09.51-4039538
+INFO (hwloc): library version 2.9.2, API version 0x20800
+--------------------------------------------------------------------------------
+
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [39m  
+  [34m──██──[32m██████[34m──██──[34m──██──[32m██████[34m──██──[34m──██──[32m██████[34m──██──[39m  
+  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [31m██████[31m██████[31m██████[34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m──██──[34m──██──[34m──██──[31m██████[31m██████[31m██████[34m──██──[34m──██──[34m──██──[39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [31m██████[31m██████[31m██████[34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m  ▕▏  [32m██████[34m  ▕▏  [31m██████[31m██████[31m██████[34m  ▕▏  [32m██████[34m  ▕▏  [39m  
+  [34m──██──[32m██████[34m──██──[31m██████[31m██████[31m██████[34m──██──[32m██████[34m──██──[39m  
+  [34m  ▕▏  [32m██████[34m  ▕▏  [31m██████[31m██████[31m██████[34m  ▕▏  [32m██████[34m  ▕▏  [39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [31m██████[31m██████[31m██████[34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m──██──[34m──██──[34m──██──[31m██████[31m██████[31m██████[34m──██──[34m──██──[34m──██──[39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [31m██████[31m██████[31m██████[34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [39m  
+  [34m──██──[32m██████[34m──██──[34m──██──[32m██████[34m──██──[34m──██──[32m██████[34m──██──[39m  
+  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [34m  ▕▏  [32m██████[34m  ▕▏  [39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+  [34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[34m──██──[39m  
+  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [34m  ▕▏  [39m  
+
+AMR driver provided by CarpetX,
+using AMReX 23.08 (MPI, OpenMP, no accelerators, debug)
+--------------------------------------------------------------------------------
+
+MPI initialized with 8 MPI processes
+MPI initialized with thread support level 2
+OMP initialized with 1 OMP threads
+AMReX (23.08) initialized
+INFO (CarpetX): 
+Symmetries:
+  lower x: reflection
+  lower y: reflection
+  lower z: reflection
+  upper x: none
+  upper y: none
+  upper z: none
+Default boundaries:
+  lower x: symmetry_boundary
+  lower y: symmetry_boundary
+  lower z: symmetry_boundary
+  upper x: dirichlet
+  upper y: dirichlet
+  upper z: dirichlet
+INFO (Arith): Test_smallvector
+INFO (Arith): Test_spvect
+--------------------------------------------------------------------------------
+INFO (Formaline): Writing tarballs with the Cactus sources into the directory "benchmark-canudax/cactus-source"
+INFO (CarpetX): Setting up initial conditions...
+INFO (CarpetX): Iteration: 0   time: 0   delta_time: 0.00195312
+INFO (CarpetX): Patch 0:
+INFO (CarpetX):   Grid extent:
+INFO (CarpetX):     gsh=[263,263,263]
+INFO (CarpetX):     blocking_factor=[8,8,8]
+INFO (CarpetX):     max_grid_size=[128,128,64]
+INFO (CarpetX):     max_tile_size=[1073741824,32,32]
+INFO (CarpetX):   Domain extent:
+INFO (CarpetX):     xmin=[0,0,0]
+INFO (CarpetX):     xmax=[1,1,1]
+INFO (CarpetX):     base dx=[0.00390625,0.00390625,0.00390625]
+INFO (CarpetX): Initializing level 0...
+INFO (CarpetX): Regridding...
+INFO (CarpetX):   level 0: 16 boxes, 16777216 cells (100%)
+INFO (CarpetX): Initialized 1 levels
+INFO (TimerReport): Timer Report at iteration 0 time 0
+INFO (TimerReport): Top timers at iteration 0 time 0
+======================================================================
+    %    Time/s   Min/s   Max/s   Timer (gettimeofday)
+======================================================================
+100.0   5.93940 5.86755 6.00263   CallFunction CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+ 50.0   2.96991 2.93532 3.00165   [0037] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in CCTK_POSTSTEP
+ 50.0   2.96950 2.93224 3.00100   [0029] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in CCTK_POSTINITIAL
+ 24.8   1.47484 1.30807 1.65106   Sync
+ 24.0   1.42284 1.42069 1.42451   [0040] CanudaX_BSSNMoL: LeanBSSN_bssn_constraints in CCTK_ANALYSIS
+ 24.0   1.42283 1.42069 1.42451   CallFunction CCTK_ANALYSIS: CanudaX_BSSNMoL::LeanBSSN_bssn_constraints
+ 14.9   0.88585 0.39676 1.32737   apply_boundary_conditions
+  7.7   0.45477 0.44259 0.45897   InitialiseRegrid [coarse]
+  7.0   0.41281 0.40253 0.41634   [0010] CanudaX_BSSNMoL: LeanBSSN_zero in CCTK_BASEGRID
+  7.0   0.41280 0.40252 0.41633   CallFunction CCTK_BASEGRID: CanudaX_BSSNMoL::LeanBSSN_zero
+  2.9   0.17431 0.14657 0.20313   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+  2.7   0.15753 0.15525 0.16019   [0019] CanudaX_BSSNMoL: LeanBSSN_adm2bssn in CCTK_INITIAL
+  2.7   0.15752 0.15525 0.16019   CallFunction CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_adm2bssn
+  2.6   0.15510 0.15375 0.15641   [0020] CanudaX_BSSNMoL: LeanBSSN_gammat in CCTK_INITIAL
+  2.6   0.15509 0.15374 0.15640   CallFunction CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_gammat
+  1.9   0.11352 0.10742 0.11833   [0013] ADMBaseX: ADMBaseX_initial_data in CCTK_INITIAL
+  1.9   0.11350 0.10741 0.11832   CallFunction ADMBaseX_InitialData: ADMBaseX::ADMBaseX_initial_data
+  1.8   0.10703 0.10655 0.10737   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+  1.6   0.09746 0.07229 0.11532   CallFunction TmunuBaseX_SetTmunuVars: TmunuBaseX::TmunuBaseX_ZeroTmunu
+  1.5   0.08738 0.07406 0.10172   [0035] CanudaX_BSSNMoL: LeanBSSN_bssn2adm in CCTK_POSTSTEP
+  1.5   0.08695 0.07252 0.10143   [0027] CanudaX_BSSNMoL: LeanBSSN_bssn2adm in CCTK_POSTINITIAL
+  0.9   0.05388 0.00002 0.10838   [0039] CarpetX: CarpetX_CheckpointInitial in CCTK_CPINITIAL
+  0.9   0.05387 0.00001 0.10837   CallFunction CCTK_CPINITIAL: CarpetX::CarpetX_CheckpointInitial
+  0.9   0.05363 0.05328 0.05397   [0033] CanudaX_BSSNMoL: LeanBSSN_remove_trA in CCTK_POSTSTEP
+  0.9   0.05340 0.05316 0.05366   [0025] CanudaX_BSSNMoL: LeanBSSN_remove_trA in CCTK_POSTINITIAL
+  0.8   0.04825 0.04278 0.05379   [0022] TmunuBaseX: TmunuBaseX_ZeroTmunu in CCTK_INITIAL
+  0.6   0.03378 0.03166 0.03514   [0011] CanudaX_BSSNMoL: LeanBSSN_zero_constr in CCTK_BASEGRID
+  0.6   0.03377 0.03163 0.03513   CallFunction CCTK_BASEGRID: CanudaX_BSSNMoL::LeanBSSN_zero_constr
+  0.5   0.03156 0.02492 0.03573   [0031] ErrorEstimator: EstimateError in CCTK_POSTSTEP
+  0.5   0.03155 0.02492 0.03573   CallFunction CCTK_POSTSTEP: ErrorEstimator::EstimateError
+  0.5   0.03150 0.02477 0.03576   [0023] ErrorEstimator: EstimateError in CCTK_POSTINITIAL
+  0.5   0.03149 0.02477 0.03576   CallFunction CCTK_POSTINITIAL: ErrorEstimator::EstimateError
+  0.4   0.02592 0.02310 0.02796   [0016] ADMBaseX: ADMBaseX_initial_shift in CCTK_INITIAL
+  0.4   0.02591 0.02309 0.02795   CallFunction ADMBaseX_InitialGauge: ADMBaseX::ADMBaseX_initial_shift
+  0.4   0.02559 0.02451 0.02654   [0017] ADMBaseX: ADMBaseX_initial_dtshift in CCTK_INITIAL
+  0.4   0.02557 0.02450 0.02653   CallFunction ADMBaseX_InitialGauge: ADMBaseX::ADMBaseX_initial_dtshift
+  0.4   0.02475 0.01489 0.03157   [0036] TmunuBaseX: TmunuBaseX_ZeroTmunu in CCTK_POSTSTEP
+  0.4   0.02447 0.01464 0.03126   [0028] TmunuBaseX: TmunuBaseX_ZeroTmunu in CCTK_POSTINITIAL
+  0.2   0.01106 0.00246 0.03240   [0006] Formaline: Formaline_OutputSource in CCTK_WRAGH
+  0.2   0.01106 0.00245 0.03239   CallFunction CCTK_WRAGH: Formaline::Formaline_OutputSource
+  0.1   0.00816 0.00759 0.00877   [0014] ADMBaseX: ADMBaseX_initial_lapse in CCTK_INITIAL
+  0.1   0.00814 0.00758 0.00874   CallFunction ADMBaseX_InitialGauge: ADMBaseX::ADMBaseX_initial_lapse
+  0.1   0.00800 0.00764 0.00838   [0015] ADMBaseX: ADMBaseX_initial_dtlapse in CCTK_INITIAL
+  0.1   0.00799 0.00763 0.00837   CallFunction ADMBaseX_InitialGauge: ADMBaseX::ADMBaseX_initial_dtlapse
+  0.1   0.00768 0.00741 0.00803   [0012] CarpetX: CarpetX_InitError in CCTK_BASEGRID
+  0.1   0.00767 0.00740 0.00801   CallFunction CCTK_BASEGRID: CarpetX::CarpetX_InitError
+  0.1   0.00490 0.00451 0.00551   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+  0.0   0.00248 0.00227 0.00290   [0024] CanudaX_BSSNMoL: LeanBSSN_impose_conf_fac_floor in CCTK_POSTINITIAL
+  0.0   0.00243 0.00222 0.00265   [0032] CanudaX_BSSNMoL: LeanBSSN_impose_conf_fac_floor in CCTK_POSTSTEP
+  0.0   0.00063 0.00001 0.00490   [0008] Formaline: Formaline_AnnounceInitial in CCTK_WRAGH
+======================================================================
+INFO (CarpetX): OutputGH: iteration 0, time 0.000000, run time 11 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Starting evolution...
+INFO (ODESolvers): Integrator is RK4
+INFO (CarpetX): OutputGH: iteration 1, time 0.001953, run time 33 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.00195312   Iterations per second: 0.0449578   Simulation time per second: 8.78082e-05
+INFO (CarpetX): Grid cells: 1.67772e+07   Grid cell updates per second: 754266
+INFO (CarpetX): Performance:
+INFO (CarpetX):   total evolution time:            22.2431 sec
+INFO (CarpetX):   total evolution compute time:    22.2431 sec
+INFO (CarpetX):   total evolution output time:     1.5974e-05 sec
+INFO (CarpetX):   total iterations:                1
+INFO (CarpetX):   total cells updated:             1.67772e+07
+INFO (CarpetX):   average interations per second: 0.0449578
+INFO (CarpetX):   average cell updates per second: 754266
+INFO (CarpetX): OutputGH: iteration 2, time 0.003906, run time 61 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.00390625   Iterations per second: 0.036738   Simulation time per second: 7.17539e-05
+INFO (CarpetX): Grid cells: 1.67772e+07   Grid cell updates per second: 616361
+INFO (CarpetX): Performance:
+INFO (CarpetX):   total evolution time:            49.4629 sec
+INFO (CarpetX):   total evolution compute time:    49.4628 sec
+INFO (CarpetX):   total evolution output time:     3.21865e-05 sec
+INFO (CarpetX):   total iterations:                2
+INFO (CarpetX):   total cells updated:             3.35544e+07
+INFO (CarpetX):   average interations per second: 0.0404344
+INFO (CarpetX):   average cell updates per second: 678376
+INFO (CarpetX): OutputGH: iteration 3, time 0.005859, run time 88 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.00585938   Iterations per second: 0.0366875   Simulation time per second: 7.16552e-05
+INFO (CarpetX): Grid cells: 1.67772e+07   Grid cell updates per second: 615514
+INFO (CarpetX): Performance:
+INFO (CarpetX):   total evolution time:            76.7201 sec
+INFO (CarpetX):   total evolution compute time:    76.7201 sec
+INFO (CarpetX):   total evolution output time:     5.00679e-05 sec
+INFO (CarpetX):   total iterations:                3
+INFO (CarpetX):   total cells updated:             5.03316e+07
+INFO (CarpetX):   average interations per second: 0.0391032
+INFO (CarpetX):   average cell updates per second: 656042
+INFO (CarpetX): OutputGH: iteration 4, time 0.007812, run time 115 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.0078125   Iterations per second: 0.0364757   Simulation time per second: 7.12415e-05
+INFO (CarpetX): Grid cells: 1.67772e+07   Grid cell updates per second: 611960
+INFO (CarpetX): Performance:
+INFO (CarpetX):   total evolution time:            104.136 sec
+INFO (CarpetX):   total evolution compute time:    104.136 sec
+INFO (CarpetX):   total evolution output time:     6.60419e-05 sec
+INFO (CarpetX):   total iterations:                4
+INFO (CarpetX):   total cells updated:             6.71089e+07
+INFO (CarpetX):   average interations per second: 0.0384114
+INFO (CarpetX):   average cell updates per second: 644437
+INFO (CarpetX): OutputGH: iteration 5, time 0.009766, run time 143 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.00976562   Iterations per second: 0.0360511   Simulation time per second: 7.04123e-05
+INFO (CarpetX): Grid cells: 1.67772e+07   Grid cell updates per second: 604837
+INFO (CarpetX): Performance:
+INFO (CarpetX):   total evolution time:            131.874 sec
+INFO (CarpetX):   total evolution compute time:    131.874 sec
+INFO (CarpetX):   total evolution output time:     8.29697e-05 sec
+INFO (CarpetX):   total iterations:                5
+INFO (CarpetX):   total cells updated:             8.38861e+07
+INFO (CarpetX):   average interations per second: 0.037915
+INFO (CarpetX):   average cell updates per second: 636107
+INFO (CarpetX): OutputGH: iteration 6, time 0.011719, run time 171 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.0117188   Iterations per second: 0.0356606   Simulation time per second: 6.96495e-05
+INFO (CarpetX): Grid cells: 1.67772e+07   Grid cell updates per second: 598285
+INFO (CarpetX): Performance:
+INFO (CarpetX):   total evolution time:            159.916 sec
+INFO (CarpetX):   total evolution compute time:    159.916 sec
+INFO (CarpetX):   total evolution output time:     9.98974e-05 sec
+INFO (CarpetX):   total iterations:                6
+INFO (CarpetX):   total cells updated:             1.00663e+08
+INFO (CarpetX):   average interations per second: 0.0375196
+INFO (CarpetX):   average cell updates per second: 629475
+INFO (CarpetX): OutputGH: iteration 7, time 0.013672, run time 200 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.0136719   Iterations per second: 0.0350419   Simulation time per second: 6.84413e-05
+INFO (CarpetX): Grid cells: 1.67772e+07   Grid cell updates per second: 587906
+INFO (CarpetX): Performance:
+INFO (CarpetX):   total evolution time:            188.454 sec
+INFO (CarpetX):   total evolution compute time:    188.453 sec
+INFO (CarpetX):   total evolution output time:     0.000118017 sec
+INFO (CarpetX):   total iterations:                7
+INFO (CarpetX):   total cells updated:             1.17441e+08
+INFO (CarpetX):   average interations per second: 0.0371444
+INFO (CarpetX):   average cell updates per second: 623180
+INFO (CarpetX): OutputGH: iteration 8, time 0.015625, run time 228 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.015625   Iterations per second: 0.0353972   Simulation time per second: 6.91351e-05
+INFO (CarpetX): Grid cells: 1.67772e+07   Grid cell updates per second: 593866
+INFO (CarpetX): Performance:
+INFO (CarpetX):   total evolution time:            216.704 sec
+INFO (CarpetX):   total evolution compute time:    216.704 sec
+INFO (CarpetX):   total evolution output time:     0.000133991 sec
+INFO (CarpetX):   total iterations:                8
+INFO (CarpetX):   total cells updated:             1.34218e+08
+INFO (CarpetX):   average interations per second: 0.0369167
+INFO (CarpetX):   average cell updates per second: 619359
+INFO (CarpetX): OutputGH: iteration 9, time 0.017578, run time 256 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.0175781   Iterations per second: 0.035624   Simulation time per second: 6.95782e-05
+INFO (CarpetX): Grid cells: 1.67772e+07   Grid cell updates per second: 597672
+INFO (CarpetX): Performance:
+INFO (CarpetX):   total evolution time:            244.775 sec
+INFO (CarpetX):   total evolution compute time:    244.775 sec
+INFO (CarpetX):   total evolution output time:     0.000151157 sec
+INFO (CarpetX):   total iterations:                9
+INFO (CarpetX):   total cells updated:             1.50995e+08
+INFO (CarpetX):   average interations per second: 0.0367684
+INFO (CarpetX):   average cell updates per second: 616872
+INFO (TimerReport): Timer Report at iteration 10 time 0.0195312
+INFO (TimerReport): Top timers at iteration 10 time 0.0195312
+======================================================================
+    %    Time/s   Min/s   Max/s   Timer (gettimeofday)
+======================================================================
+100.0   205.822 200.351 209.199   CallFunction CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+ 97.9   201.547 200.675 202.364   [0043] ODESolvers: ODESolvers_Solve in CCTK_EVOL
+ 97.9   201.547 200.675 202.364   CallFunction CCTK_EVOL: ODESolvers::ODESolvers_Solve
+ 93.3   192.067 190.470 194.320   CallScheduleGroup
+ 77.5   159.610 155.253 162.342   [0044] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in ODESolvers_RHS
+ 21.0    43.243  42.158  43.857   [0037] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in CCTK_POSTSTEP
+ 16.9    34.807  28.471  44.085   Sync
+ 10.0    20.652  20.179  20.915   [0040] CanudaX_BSSNMoL: LeanBSSN_bssn_constraints in CCTK_ANALYSIS
+ 10.0    20.652  20.179  20.915   CallFunction CCTK_ANALYSIS: CanudaX_BSSNMoL::LeanBSSN_bssn_constraints
+  9.6    19.816   8.590  31.262   apply_boundary_conditions
+  5.0    10.333  10.333  10.333   Initialise
+  2.3     4.692   4.101   5.344   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+  1.8     3.630   3.188   4.121   [0049] CanudaX_BSSNMoL: LeanBSSN_bssn2adm in ODESolvers_PostStep
+  1.7     3.498   3.442   3.519   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+  1.4     2.970   2.932   3.001   [0029] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in CCTK_POSTINITIAL
+  1.3     2.710   2.666   2.726   [0047] CanudaX_BSSNMoL: LeanBSSN_remove_trA in ODESolvers_PostStep
+  0.7     1.374   0.969   1.693   CallFunction TmunuBaseX_SetTmunuVars: TmunuBaseX::TmunuBaseX_ZeroTmunu
+  0.5     1.037   0.714   1.268   [0050] TmunuBaseX: TmunuBaseX_ZeroTmunu in ODESolvers_PostStep
+  0.5     0.975   0.841   1.122   [0035] CanudaX_BSSNMoL: LeanBSSN_bssn2adm in CCTK_POSTSTEP
+  0.4     0.892   0.000   2.163   [0051] CarpetX: CarpetX_Checkpoint in CCTK_CHECKPOINT
+  0.4     0.892   0.000   2.163   CallFunction CCTK_CHECKPOINT: CarpetX::CarpetX_Checkpoint
+  0.4     0.735   0.722   0.744   [0033] CanudaX_BSSNMoL: LeanBSSN_remove_trA in CCTK_POSTSTEP
+  0.2     0.455   0.443   0.459   InitialiseRegrid [coarse]
+  0.2     0.413   0.403   0.416   [0010] CanudaX_BSSNMoL: LeanBSSN_zero in CCTK_BASEGRID
+  0.2     0.413   0.403   0.416   CallFunction CCTK_BASEGRID: CanudaX_BSSNMoL::LeanBSSN_zero
+  0.2     0.412   0.333   0.457   [0031] ErrorEstimator: EstimateError in CCTK_POSTSTEP
+  0.2     0.412   0.333   0.457   CallFunction CCTK_POSTSTEP: ErrorEstimator::EstimateError
+  0.1     0.264   0.198   0.343   [0036] TmunuBaseX: TmunuBaseX_ZeroTmunu in CCTK_POSTSTEP
+  0.1     0.194   0.137   0.251   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+  0.1     0.159   0.106   0.215   [0046] CanudaX_BSSNMoL: LeanBSSN_impose_conf_fac_floor in ODESolvers_PostStep
+  0.1     0.158   0.155   0.160   [0019] CanudaX_BSSNMoL: LeanBSSN_adm2bssn in CCTK_INITIAL
+  0.1     0.158   0.155   0.160   CallFunction CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_adm2bssn
+  0.1     0.155   0.154   0.156   [0020] CanudaX_BSSNMoL: LeanBSSN_gammat in CCTK_INITIAL
+  0.1     0.155   0.154   0.156   CallFunction CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_gammat
+  0.1     0.114   0.107   0.118   [0013] ADMBaseX: ADMBaseX_initial_data in CCTK_INITIAL
+  0.1     0.114   0.107   0.118   CallFunction ADMBaseX_InitialData: ADMBaseX::ADMBaseX_initial_data
+  0.0     0.087   0.073   0.101   [0027] CanudaX_BSSNMoL: LeanBSSN_bssn2adm in CCTK_POSTINITIAL
+  0.0     0.054   0.000   0.108   [0039] CarpetX: CarpetX_CheckpointInitial in CCTK_CPINITIAL
+  0.0     0.054   0.000   0.108   CallFunction CCTK_CPINITIAL: CarpetX::CarpetX_CheckpointInitial
+  0.0     0.053   0.053   0.054   [0025] CanudaX_BSSNMoL: LeanBSSN_remove_trA in CCTK_POSTINITIAL
+  0.0     0.048   0.043   0.054   [0022] TmunuBaseX: TmunuBaseX_ZeroTmunu in CCTK_INITIAL
+  0.0     0.034   0.032   0.035   [0011] CanudaX_BSSNMoL: LeanBSSN_zero_constr in CCTK_BASEGRID
+  0.0     0.034   0.032   0.035   CallFunction CCTK_BASEGRID: CanudaX_BSSNMoL::LeanBSSN_zero_constr
+  0.0     0.032   0.029   0.041   [0032] CanudaX_BSSNMoL: LeanBSSN_impose_conf_fac_floor in CCTK_POSTSTEP
+  0.0     0.031   0.025   0.036   [0023] ErrorEstimator: EstimateError in CCTK_POSTINITIAL
+  0.0     0.031   0.025   0.036   CallFunction CCTK_POSTINITIAL: ErrorEstimator::EstimateError
+  0.0     0.026   0.023   0.028   [0016] ADMBaseX: ADMBaseX_initial_shift in CCTK_INITIAL
+  0.0     0.026   0.023   0.028   CallFunction ADMBaseX_InitialGauge: ADMBaseX::ADMBaseX_initial_shift
+  0.0     0.026   0.025   0.027   [0017] ADMBaseX: ADMBaseX_initial_dtshift in CCTK_INITIAL
+  0.0     0.026   0.024   0.027   CallFunction ADMBaseX_InitialGauge: ADMBaseX::ADMBaseX_initial_dtshift
+======================================================================
+INFO (CarpetX): OutputGH: iteration 10, time 0.019531, run time 284 s
+INFO (CarpetX): OutputGH done.
+INFO (CarpetX): Simulation time: 0.0195312   Iterations per second: 0.0358622   Simulation time per second: 7.00434e-05
+INFO (CarpetX): Grid cells: 1.67772e+07   Grid cell updates per second: 601668
+INFO (CarpetX): Performance:
+INFO (CarpetX):   total evolution time:            272.66 sec
+INFO (CarpetX):   total evolution compute time:    272.66 sec
+INFO (CarpetX):   total evolution output time:     0.000156164 sec
+INFO (CarpetX):   total iterations:                10
+INFO (CarpetX):   total cells updated:             1.67772e+08
+INFO (CarpetX):   average interations per second: 0.0366757
+INFO (CarpetX):   average cell updates per second: 615317
+INFO (CarpetX): Shutting down...
+INFO (TimerReport): Timer Report before terminating at iteration 10 time 0.0195312
+INFO (TimerReport): Top timers at iteration 10 time 0.0195312
+======================================================================
+    %    Time/s   Min/s   Max/s   Timer (gettimeofday)
+======================================================================
+100.0   272.661 272.661 272.661   Evolve
+ 75.5   205.822 200.351 209.199   CallFunction CanudaX_BSSNMoL_RHSGroup: CanudaX_BSSNMoL::LeanBSSN_CalcRHS
+ 73.9   201.547 200.675 202.364   [0043] ODESolvers: ODESolvers_Solve in CCTK_EVOL
+ 73.9   201.547 200.675 202.364   CallFunction CCTK_EVOL: ODESolvers::ODESolvers_Solve
+ 70.4   192.067 190.470 194.320   CallScheduleGroup
+ 58.5   159.610 155.253 162.342   [0044] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in ODESolvers_RHS
+ 15.9    43.243  42.158  43.857   [0037] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in CCTK_POSTSTEP
+ 12.8    34.807  28.471  44.085   Sync
+  7.6    20.652  20.179  20.915   [0040] CanudaX_BSSNMoL: LeanBSSN_bssn_constraints in CCTK_ANALYSIS
+  7.6    20.652  20.179  20.915   CallFunction CCTK_ANALYSIS: CanudaX_BSSNMoL::LeanBSSN_bssn_constraints
+  7.3    19.816   8.590  31.262   apply_boundary_conditions
+  3.8    10.333  10.333  10.333   Initialise
+  1.7     4.692   4.101   5.344   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_bssn2adm
+  1.3     3.630   3.188   4.121   [0049] CanudaX_BSSNMoL: LeanBSSN_bssn2adm in ODESolvers_PostStep
+  1.3     3.498   3.442   3.519   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_remove_trA
+  1.1     2.970   2.932   3.001   [0029] CanudaX_BSSNMoL: LeanBSSN_CalcRHS in CCTK_POSTINITIAL
+  1.0     2.710   2.666   2.726   [0047] CanudaX_BSSNMoL: LeanBSSN_remove_trA in ODESolvers_PostStep
+  0.5     1.374   0.969   1.693   CallFunction TmunuBaseX_SetTmunuVars: TmunuBaseX::TmunuBaseX_ZeroTmunu
+  0.4     1.037   0.714   1.268   [0050] TmunuBaseX: TmunuBaseX_ZeroTmunu in ODESolvers_PostStep
+  0.4     0.975   0.841   1.122   [0035] CanudaX_BSSNMoL: LeanBSSN_bssn2adm in CCTK_POSTSTEP
+  0.3     0.892   0.000   2.163   [0051] CarpetX: CarpetX_Checkpoint in CCTK_CHECKPOINT
+  0.3     0.892   0.000   2.163   CallFunction CCTK_CHECKPOINT: CarpetX::CarpetX_Checkpoint
+  0.3     0.735   0.722   0.744   [0033] CanudaX_BSSNMoL: LeanBSSN_remove_trA in CCTK_POSTSTEP
+  0.2     0.455   0.443   0.459   InitialiseRegrid [coarse]
+  0.2     0.413   0.403   0.416   [0010] CanudaX_BSSNMoL: LeanBSSN_zero in CCTK_BASEGRID
+  0.2     0.413   0.403   0.416   CallFunction CCTK_BASEGRID: CanudaX_BSSNMoL::LeanBSSN_zero
+  0.2     0.412   0.333   0.457   [0031] ErrorEstimator: EstimateError in CCTK_POSTSTEP
+  0.2     0.412   0.333   0.457   CallFunction CCTK_POSTSTEP: ErrorEstimator::EstimateError
+  0.1     0.264   0.198   0.343   [0036] TmunuBaseX: TmunuBaseX_ZeroTmunu in CCTK_POSTSTEP
+  0.1     0.194   0.137   0.251   CallFunction CanudaX_BSSNMoL_PostStepGroup: CanudaX_BSSNMoL::LeanBSSN_impose_conf_fac_floor
+  0.1     0.159   0.106   0.215   [0046] CanudaX_BSSNMoL: LeanBSSN_impose_conf_fac_floor in ODESolvers_PostStep
+  0.1     0.158   0.155   0.160   [0019] CanudaX_BSSNMoL: LeanBSSN_adm2bssn in CCTK_INITIAL
+  0.1     0.158   0.155   0.160   CallFunction CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_adm2bssn
+  0.1     0.155   0.154   0.156   [0020] CanudaX_BSSNMoL: LeanBSSN_gammat in CCTK_INITIAL
+  0.1     0.155   0.154   0.156   CallFunction CanudaX_BSSNMoL_InitialGroup: CanudaX_BSSNMoL::LeanBSSN_gammat
+  0.0     0.114   0.107   0.118   [0013] ADMBaseX: ADMBaseX_initial_data in CCTK_INITIAL
+  0.0     0.114   0.107   0.118   CallFunction ADMBaseX_InitialData: ADMBaseX::ADMBaseX_initial_data
+  0.0     0.087   0.073   0.101   [0027] CanudaX_BSSNMoL: LeanBSSN_bssn2adm in CCTK_POSTINITIAL
+  0.0     0.054   0.000   0.108   [0039] CarpetX: CarpetX_CheckpointInitial in CCTK_CPINITIAL
+  0.0     0.054   0.000   0.108   CallFunction CCTK_CPINITIAL: CarpetX::CarpetX_CheckpointInitial
+  0.0     0.053   0.053   0.054   [0025] CanudaX_BSSNMoL: LeanBSSN_remove_trA in CCTK_POSTINITIAL
+  0.0     0.048   0.043   0.054   [0022] TmunuBaseX: TmunuBaseX_ZeroTmunu in CCTK_INITIAL
+  0.0     0.034   0.032   0.035   [0011] CanudaX_BSSNMoL: LeanBSSN_zero_constr in CCTK_BASEGRID
+  0.0     0.034   0.032   0.035   CallFunction CCTK_BASEGRID: CanudaX_BSSNMoL::LeanBSSN_zero_constr
+  0.0     0.032   0.029   0.041   [0032] CanudaX_BSSNMoL: LeanBSSN_impose_conf_fac_floor in CCTK_POSTSTEP
+  0.0     0.031   0.025   0.036   [0023] ErrorEstimator: EstimateError in CCTK_POSTINITIAL
+  0.0     0.031   0.025   0.036   CallFunction CCTK_POSTINITIAL: ErrorEstimator::EstimateError
+  0.0     0.026   0.023   0.028   [0016] ADMBaseX: ADMBaseX_initial_shift in CCTK_INITIAL
+  0.0     0.026   0.023   0.028   CallFunction ADMBaseX_InitialGauge: ADMBaseX::ADMBaseX_initial_shift
+  0.0     0.026   0.025   0.027   [0017] ADMBaseX: ADMBaseX_initial_dtshift in CCTK_INITIAL
+======================================================================
+AMReX (23.08) finalized
+--------------------------------------------------------------------------------
+Done.

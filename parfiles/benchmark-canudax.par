@@ -6,22 +6,22 @@ ActiveThorns = "
     Formaline
     IOUtil
     ODESolvers
-    SystemTopology
+    #SystemTopology
     TimerReport
     TmunuBaseX
 "
 
 $nlevels = 1   #TODO 8
-$ncells_x = 512   #TODO 128
-$ncells_y = 512   #TODO 128
-$ncells_z = 512   #TODO 128
+$ncells_x = 512/2   #TODO 128
+$ncells_y = 512/2   #TODO 128
+$ncells_z = 512/2   #TODO 128
 $blocking_factor = 8
-$max_grid_size_x = 32
-$max_grid_size_y = 32
-$max_grid_size_z = 32
+$max_grid_size_x = 128
+$max_grid_size_y = 128
+$max_grid_size_z = 64
 $max_tile_size_x = 1073741824
-$max_tile_size_y = 16
-$max_tile_size_z = 16
+$max_tile_size_y = 32
+$max_tile_size_z = 32
 
 CarpetX::verbose = no
 Cactus::cctk_show_schedule = no
